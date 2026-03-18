@@ -3,146 +3,97 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiMessageSquare, FiPlus, FiThumbsUp, FiUsers, FiClock } from 'react-icons/fi';
-import { collection, query, orderBy, getDocs, limit, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { FiMessageSquare, FiPlus, FiClock, FiChevronRight, FiEye } from 'react-icons/fi';
+import { collection, query, where, getDocs, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
-interface Post {
+interface Board {
   id: string;
   title: string;
-  content: string;
-  authorId: string;
-  authorName: string;
-  category: string;
-  likes: number;
-  createdAt: any;
-  commentCount: number;
+  description: string;
+  icon: string;
+  color: string;
+  threadCount: number;
+  postCount: number;
+  lastPost?: {
+    title: string;
+    author: string;
+    time: any;
+  };
 }
 
-const FORUM_SECTIONS = [
-  { id: 'general', label: 'General' },
-  { id: 'trading', label: 'Trading' },
-  { id: 'showcase', label: 'Showcase' },
-  { id: 'help', label: 'Help' },
-  { id: 'news', label: 'News' },
+const BOARDS: Board[] = [
+  { id: 'general', title: 'General Discussion', description: 'Talk about anything collector-related', icon: '💬', color: '#C0A080', threadCount: 0, postCount: 0 },
+  { id: 'trading', title: 'Trading Post', description: 'Buy, sell, and trade with other collectors', icon: '🔄', color: '#4CAF50', threadCount: 0, postCount: 0 },
+  { id: 'showcase', title: 'Showcase', description: 'Show off your collections', icon: '🏆', color: '#2196F3', threadCount: 0, postCount: 0 },
+  { id: 'help', title: 'Help & Support', description: 'Get help with your collections', icon: '❓', color: '#FF9800', threadCount: 0, postCount: 0 },
+  { id: 'news', title: 'News & Updates', description: 'Latest news and announcements', icon: '📰', color: '#9C27B0', threadCount: 0, postCount: 0 },
 ];
 
-const POSTS_PER_PAGE = 10;
-
-export default function ForumPage() {
-  const { user, profile, updateProfile } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [category, setCategory] = useState('all');
+export default function ForumBoardsPage() {
+  const { user } = useAuth();
+  const [boards, setBoards] = useState<Board[]>(BOARDS);
   const [loading, setLoading] = useState(true);
-  const [showNewPost, setShowNewPost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', category: 'general' });
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    
-    const fetchPosts = async () => {
+    const fetchBoardStats = async () => {
       try {
-        const postsRef = collection(db, 'forum_posts');
-        const postsQuery = query(
-          postsRef, 
-          orderBy('createdAt', 'desc'), 
-          limit(POSTS_PER_PAGE)
+        const threadsRef = collection(db, 'forum_threads');
+        const boardsWithStats = await Promise.all(
+          BOARDS.map(async (board) => {
+            const threadsQuery = query(threadsRef, where('board', '==', board.id));
+            const threadsSnap = await getDocs(threadsQuery);
+            
+            let postCount = 0;
+            let lastPost: Board['lastPost'] = undefined;
+            
+            const threads = threadsSnap.docs.map(d => d.data());
+            postCount = threads.length;
+            
+            if (threads.length > 0) {
+              const sortedThreads = threads.sort((a: any, b: any) => {
+                const aTime = a.createdAt?.toDate?.() || new Date(0);
+                const bTime = b.createdAt?.toDate?.() || new Date(0);
+                return bTime.getTime() - aTime.getTime();
+              });
+              
+              if (sortedThreads[0]) {
+                lastPost = {
+                  title: sortedThreads[0].title,
+                  author: sortedThreads[0].authorName,
+                  time: sortedThreads[0].createdAt,
+                };
+              }
+            }
+            
+            return {
+              ...board,
+              threadCount: threadsSnap.size,
+              postCount,
+              lastPost,
+            };
+          })
         );
-        const snapshot = await getDocs(postsQuery);
         
-        if (!mounted) return;
-        
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Post[];
-        setPosts(data);
+        setBoards(boardsWithStats);
       } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching boards:', error);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchPosts();
-
-    return () => { mounted = false; };
+    fetchBoardStats();
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-
-    const updatePresence = async () => {
-      try {
-        await setDoc(doc(db, 'presence', user.uid), {
-          uid: user.uid,
-          displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-          lastActive: serverTimestamp(),
-          online: true,
-        }, { merge: true });
-      } catch (e) {
-        console.log('Presence update skipped');
-      }
-    };
-
-    updatePresence();
-  }, [user]);
-
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPost.title.trim() || !newPost.content.trim() || !user) return;
-
-    setSubmitting(true);
-    try {
-      await addDoc(collection(db, 'forum_posts'), {
-        title: newPost.title,
-        content: newPost.content,
-        category: newPost.category,
-        authorId: user.uid,
-        authorName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        likes: 0,
-        createdAt: serverTimestamp(),
-        commentCount: 0,
-      });
-      
-      if (profile) {
-        await updateProfile({ postCount: (profile.postCount || 0) + 1 });
-      }
-      
-      const postsQuery = query(
-        collection(db, 'forum_posts'), 
-        orderBy('createdAt', 'desc'), 
-        limit(POSTS_PER_PAGE)
-      );
-      const snapshot = await getDocs(postsQuery);
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Post[];
-      setPosts(data);
-      
-      setNewPost({ title: '', content: '', category: 'general' });
-      setShowNewPost(false);
-    } catch (error) {
-      console.error('Error creating post:', error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const filteredPosts = category === 'all' 
-    ? posts 
-    : posts.filter(post => post.category === category);
-
-  const formatDate = (timestamp: any) => {
+  const formatTime = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (hours < 1) return 'just now';
+    if (hours < 1) return 'Just now';
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
@@ -151,88 +102,26 @@ export default function ForumPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white pb-20">
       <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[#1F1F1F] px-4 py-3 z-30">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-xl font-semibold">Community</h1>
-            <p className="text-xs text-[#666]">{posts.length} recent posts</p>
-          </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Forums</h1>
           {user && (
-            <button
-              onClick={() => setShowNewPost(!showNewPost)}
+            <Link
+              href="/forum/new"
               className="flex items-center gap-2 px-4 py-2 bg-[#C0A080] text-black rounded-full text-sm font-medium"
             >
               <FiPlus size={16} />
-              Post
-            </button>
+              New Thread
+            </Link>
           )}
-        </div>
-        
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          <button
-            onClick={() => setCategory('all')}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
-              category === 'all' ? 'bg-white text-black' : 'bg-[#1F1F1F] text-[#888]'
-            }`}
-          >
-            All
-          </button>
-          {FORUM_SECTIONS.map(section => (
-            <button
-              key={section.id}
-              onClick={() => setCategory(section.id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                category === section.id ? 'bg-white text-black' : 'bg-[#1F1F1F] text-[#888]'
-              }`}
-            >
-              {section.label}
-            </button>
-          ))}
         </div>
       </div>
 
       {!user && (
         <div className="mx-4 mt-3 p-4 bg-[#141414] rounded-lg border border-[#1F1F1F]">
           <p className="text-sm text-[#666]">
-            <Link href="/login" className="text-[#C0A080]">Sign in</Link> to join the discussion.
+            <Link href="/login" className="text-[#C0A080]">Sign in</Link> to create threads.
           </p>
         </div>
-      )}
-
-      {showNewPost && user && (
-        <form onSubmit={handleCreatePost} className="mx-4 mt-3 p-4 bg-[#141414] rounded-xl border border-[#1F1F1F] space-y-3">
-          <input
-            type="text"
-            placeholder="What's on your mind?"
-            value={newPost.title}
-            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white focus:border-[#C0A080] outline-none"
-            required
-          />
-          <textarea
-            placeholder="Share more details..."
-            value={newPost.content}
-            onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white focus:border-[#C0A080] outline-none resize-none"
-            rows={3}
-            required
-          />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setShowNewPost(false)}
-              className="flex-1 py-2.5 bg-[#1F1F1F] text-white rounded-lg text-sm"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 py-2.5 bg-[#C0A080] text-black rounded-lg font-medium text-sm disabled:opacity-50"
-            >
-              {submitting ? 'Posting...' : 'Post'}
-            </button>
-          </div>
-        </form>
       )}
 
       {loading ? (
@@ -241,52 +130,51 @@ export default function ForumPage() {
         </div>
       ) : (
         <div className="p-4 space-y-2">
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map(post => (
-              <Link
-                key={post.id}
-                href={`/forum/${post.id}`}
-                className="block p-4 bg-[#141414] rounded-xl border border-[#1F1F1F] hover:border-[#C0A080]/30 transition-colors"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center text-sm font-medium text-[#C0A080]">
-                    {post.authorName?.[0]?.toUpperCase() || '?'}
+          {boards.map((board) => (
+            <Link
+              key={board.id}
+              href={`/forum/${board.id}`}
+              className="block bg-[#141414] rounded-xl border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors overflow-hidden"
+            >
+              <div className="p-4 flex items-start gap-4">
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                  style={{ backgroundColor: `${board.color}20` }}
+                >
+                  {board.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-white">{board.title}</h3>
+                    {board.id === 'trading' && (
+                      <span className="text-[10px] bg-[#C0A080]/20 text-[#C0A080] px-2 py-0.5 rounded-full">Active</span>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-[10px] text-[#666] mb-1">
-                      <span className="text-[#888] font-medium">{post.authorName}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <FiClock size={10} />
-                        {formatDate(post.createdAt)}
-                      </span>
-                    </div>
-                    <h3 className="font-medium text-white text-sm leading-tight">{post.title}</h3>
-                    <p className="text-xs text-[#666] mt-1.5 line-clamp-2">{post.content}</p>
-                    <div className="flex items-center gap-4 mt-3 text-xs text-[#666]">
-                      <span className="flex items-center gap-1">
-                        <FiThumbsUp size={12} />
-                        {post.likes || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <FiMessageSquare size={12} />
-                        {post.commentCount || 0}
-                      </span>
-                      <span className="ml-auto text-[10px] bg-[#1F1F1F] px-2 py-0.5 rounded-full capitalize">
-                        {post.category}
-                      </span>
-                    </div>
+                  <p className="text-sm text-[#666] mt-0.5 line-clamp-1">{board.description}</p>
+                  
+                  <div className="flex items-center gap-4 mt-2 text-xs text-[#444]">
+                    <span className="flex items-center gap-1">
+                      <FiMessageSquare size={12} />
+                      {board.threadCount} threads
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <FiEye size={12} />
+                      {board.postCount} posts
+                    </span>
                   </div>
                 </div>
-              </Link>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16">
-              <FiMessageSquare size={48} className="text-[#2A2A2A] mb-4" />
-              <h3 className="text-lg text-[#666]">No discussions yet</h3>
-              <p className="text-sm text-[#444] mt-1">Be the first to start a conversation!</p>
-            </div>
-          )}
+                <FiChevronRight size={20} className="text-[#444]" />
+              </div>
+              
+              {board.lastPost && (
+                <div className="px-4 py-2 bg-[#0A0A0A] border-t border-[#1F1F1F] flex items-center gap-2 text-xs">
+                  <span className="text-[#666]">Latest:</span>
+                  <span className="text-white truncate flex-1">{board.lastPost.title}</span>
+                  <span className="text-[#444]">{formatTime(board.lastPost.time)}</span>
+                </div>
+              )}
+            </Link>
+          ))}
         </div>
       )}
     </div>
