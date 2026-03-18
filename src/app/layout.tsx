@@ -5,6 +5,7 @@ import { AppProvider } from "../context/AppContext";
 import { AuthProvider } from "../context/AuthContext";
 import BottomNav from "../components/layout/BottomNav";
 import AuthGuard from "../components/AuthGuard";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({
             </AuthGuard>
           </AppProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
