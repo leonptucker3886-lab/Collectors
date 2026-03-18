@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiMessageSquare, FiPlus, FiThumbsUp } from 'react-icons/fi';
+import { FiMessageSquare, FiPlus, FiThumbsUp, FiUsers, FiClock, FiTrendingUp } from 'react-icons/fi';
+import { doc, onSnapshot, setDoc, serverTimestamp, collection, query, orderBy, getDocs, limit, where, addDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 interface Post {
   id: string;
@@ -11,7 +13,6 @@ interface Post {
   content: string;
   authorId: string;
   authorName: string;
-  authorAvatar: string;
   category: string;
   likes: number;
   createdAt: any;
@@ -19,37 +20,49 @@ interface Post {
   isPinned?: boolean;
 }
 
+interface OnlineUser {
+  uid: string;
+  displayName: string;
+  lastActive: any;
+}
+
 const FORUM_SECTIONS = [
   { id: 'general', label: 'General' },
-  { id: 'reviews', label: 'Reviews' },
-  { id: 'news', label: 'News' },
-  { id: 'help', label: 'Q&A' },
-  { id: 'trades', label: 'Trades' },
+  { id: 'trading', label: 'Trading' },
   { id: 'showcase', label: 'Showcase' },
+  { id: 'help', label: 'Help' },
+  { id: 'news', label: 'News' },
 ];
+
+const POSTS_PER_PAGE = 15;
 
 export default function ForumPage() {
   const { user, profile, updateProfile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'general' });
   const [submitting, setSubmitting] = useState(false);
+  const [totalPosts, setTotalPosts] = useState(0);
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchInitialData = async () => {
       try {
-        const { db } = await import('../../lib/firebase');
-        const { collection, query, orderBy, getDocs } = await import('firebase/firestore');
+        const postsRef = collection(db, 'forum_posts');
+        const postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(POSTS_PER_PAGE));
+        const snapshot = await getDocs(postsQuery);
         
-        const q = query(collection(db, 'forum_posts'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Post[];
         setPosts(data);
+
+        const countQuery = query(collection(db, 'forum_posts'));
+        const countSnapshot = await getDocs(countQuery);
+        setTotalPosts(countSnapshot.size);
       } catch (error) {
         console.error('Error fetching posts:', error);
         setPosts([]);
@@ -58,8 +71,57 @@ export default function ForumPage() {
       }
     };
 
-    fetchPosts();
+    fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userStatusRef = doc(db, 'presence', user.uid);
+    
+    const setupPresence = async () => {
+      await setDoc(userStatusRef, {
+        uid: user.uid,
+        displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        lastActive: serverTimestamp(),
+        online: true,
+      }, { merge: true });
+
+      const timeout = setTimeout(async () => {
+        await setDoc(userStatusRef, {
+          lastActive: serverTimestamp(),
+          online: false,
+        }, { merge: true });
+      }, 5 * 60 * 1000);
+
+      return () => clearTimeout(timeout);
+    };
+
+    setupPresence();
+
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'presence'), where('online', '==', true), limit(20)),
+      (snapshot) => {
+        const users = snapshot.docs.map(doc => doc.data() as OnlineUser);
+        setOnlineUsers(users);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (!user) return;
+      
+      await setDoc(doc(db, 'presence', user.uid), {
+        lastActive: serverTimestamp(),
+        online: true,
+      }, { merge: true });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,9 +129,6 @@ export default function ForumPage() {
 
     setSubmitting(true);
     try {
-      const { db } = await import('../../lib/firebase');
-      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-      
       await addDoc(collection(db, 'forum_posts'), {
         title: newPost.title,
         content: newPost.content,
@@ -87,7 +146,15 @@ export default function ForumPage() {
       
       setNewPost({ title: '', content: '', category: 'general' });
       setShowNewPost(false);
-      window.location.reload();
+      
+      const postsQuery = query(collection(db, 'forum_posts'), orderBy('createdAt', 'desc'), limit(POSTS_PER_PAGE));
+      const snapshot = await getDocs(postsQuery);
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Post[];
+      setPosts(data);
+      setTotalPosts(prev => prev + 1);
     } catch (error) {
       console.error('Error creating post:', error);
     } finally {
@@ -106,17 +173,20 @@ export default function ForumPage() {
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (hours < 1) return 'now';
-    if (hours < 24) return `${hours}h`;
-    if (days < 7) return `${days}d`;
+    if (hours < 1) return 'just now';
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[#1F1F1F] px-4 py-4 z-30">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-light tracking-wide">Forum</h1>
+    <div className="min-h-screen bg-[#0A0A0A] text-white pb-20">
+      <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[#1F1F1F] px-4 py-3 z-30">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-xl font-semibold">Community</h1>
+            <p className="text-xs text-[#666]">{totalPosts} discussions</p>
+          </div>
           {user && (
             <button
               onClick={() => setShowNewPost(!showNewPost)}
@@ -127,12 +197,38 @@ export default function ForumPage() {
             </button>
           )}
         </div>
+
+        {onlineUsers.length > 0 && (
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-1 text-xs text-[#C0A080]">
+              <span className="w-2 h-2 bg-[#C0A080] rounded-full animate-pulse" />
+              <FiUsers size={12} />
+              {onlineUsers.length} online
+            </div>
+            <div className="flex -space-x-2">
+              {onlineUsers.slice(0, 5).map((u, i) => (
+                <div 
+                  key={i} 
+                  className="w-6 h-6 rounded-full bg-[#1F1F1F] border-2 border-[#0A0A0A] flex items-center justify-center text-[10px]"
+                  title={u.displayName}
+                >
+                  {u.displayName?.[0]?.toUpperCase() || '?'}
+                </div>
+              ))}
+              {onlineUsers.length > 5 && (
+                <div className="w-6 h-6 rounded-full bg-[#2A2A2A] border-2 border-[#0A0A0A] flex items-center justify-center text-[10px]">
+                  +{onlineUsers.length - 5}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button
             onClick={() => setCategory('all')}
-            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
-              category === 'all' ? 'bg-[#C0A080] text-black' : 'bg-[#1F1F1F] text-[#888]'
+            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+              category === 'all' ? 'bg-white text-black' : 'bg-[#1F1F1F] text-[#888]'
             }`}
           >
             All
@@ -141,8 +237,8 @@ export default function ForumPage() {
             <button
               key={section.id}
               onClick={() => setCategory(section.id)}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
-                category === section.id ? 'bg-[#C0A080] text-black' : 'bg-[#1F1F1F] text-[#888]'
+              className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                category === section.id ? 'bg-white text-black' : 'bg-[#1F1F1F] text-[#888]'
               }`}
             >
               {section.label}
@@ -152,52 +248,43 @@ export default function ForumPage() {
       </div>
 
       {!user && (
-        <div className="mx-4 mt-4 p-4 bg-[#141414] rounded-lg border border-[#1F1F1F]">
+        <div className="mx-4 mt-3 p-4 bg-[#141414] rounded-lg border border-[#1F1F1F]">
           <p className="text-sm text-[#666]">
-            <Link href="/login" className="text-[#C0A080]">Sign in</Link> to post.
+            <Link href="/login" className="text-[#C0A080]">Sign in</Link> to join the discussion.
           </p>
         </div>
       )}
 
       {showNewPost && user && (
-        <form onSubmit={handleCreatePost} className="mx-4 mt-4 p-4 bg-[#141414] rounded-lg border border-[#1F1F1F] space-y-3">
+        <form onSubmit={handleCreatePost} className="mx-4 mt-3 p-4 bg-[#141414] rounded-xl border border-[#1F1F1F] space-y-3">
           <input
             type="text"
-            placeholder="Title..."
+            placeholder="What's on your mind?"
             value={newPost.title}
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
             className="w-full px-4 py-2.5 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white focus:border-[#C0A080] outline-none"
             required
           />
           <textarea
-            placeholder="Content..."
+            placeholder="Share more details..."
             value={newPost.content}
             onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
             className="w-full px-4 py-2.5 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white focus:border-[#C0A080] outline-none resize-none"
-            rows={4}
+            rows={3}
             required
           />
-          <select
-            value={newPost.category}
-            onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white focus:border-[#C0A080] outline-none"
-          >
-            {FORUM_SECTIONS.map(section => (
-              <option key={section.id} value={section.id}>{section.label}</option>
-            ))}
-          </select>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setShowNewPost(false)}
-              className="flex-1 py-2.5 bg-[#1F1F1F] text-white rounded-lg"
+              className="flex-1 py-2.5 bg-[#1F1F1F] text-white rounded-lg text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2.5 bg-[#C0A080] text-black rounded-lg font-medium"
+              className="flex-1 py-2.5 bg-[#C0A080] text-black rounded-lg font-medium text-sm disabled:opacity-50"
             >
               {submitting ? 'Posting...' : 'Post'}
             </button>
@@ -206,7 +293,9 @@ export default function ForumPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-[#666]">Loading...</div>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-6 h-6 border-2 border-[#C0A080] border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : (
         <div className="p-4 space-y-2">
           {filteredPosts.length > 0 ? (
@@ -214,28 +303,34 @@ export default function ForumPage() {
               <Link
                 key={post.id}
                 href={`/forum/${post.id}`}
-                className="block p-4 bg-[#141414] rounded-lg border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors"
+                className="block p-4 bg-[#141414] rounded-xl border border-[#1F1F1F] hover:border-[#C0A080]/30 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center text-lg">
-                    {post.authorAvatar || '👤'}
+                  <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center text-sm font-medium text-[#C0A080]">
+                    {post.authorName?.[0]?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs text-[#666] mb-1">
-                      <span className="text-[#888]">{post.authorName}</span>
+                    <div className="flex items-center gap-2 text-[10px] text-[#666] mb-1">
+                      <span className="text-[#888] font-medium">{post.authorName}</span>
                       <span>·</span>
-                      <span>{formatDate(post.createdAt)}</span>
-                    </div>
-                    <h3 className="font-medium text-white truncate">{post.title}</h3>
-                    <p className="text-sm text-[#666] mt-1 line-clamp-2">{post.content}</p>
-                    <div className="flex items-center gap-4 mt-3 text-xs text-[#666]">
                       <span className="flex items-center gap-1">
-                        <FiThumbsUp size={14} />
+                        <FiClock size={10} />
+                        {formatDate(post.createdAt)}
+                      </span>
+                    </div>
+                    <h3 className="font-medium text-white text-sm leading-tight">{post.title}</h3>
+                    <p className="text-xs text-[#666] mt-1.5 line-clamp-2">{post.content}</p>
+                    <div className="flex items-center gap-4 mt-3 text-xs text-[#666]">
+                      <span className="flex items-center gap-1 hover:text-[#C0A080]">
+                        <FiThumbsUp size={12} />
                         {post.likes || 0}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <FiMessageSquare size={14} />
+                      <span className="flex items-center gap-1 hover:text-[#C0A080]">
+                        <FiMessageSquare size={12} />
                         {post.commentCount || 0}
+                      </span>
+                      <span className="ml-auto text-[10px] bg-[#1F1F1F] px-2 py-0.5 rounded-full capitalize">
+                        {post.category}
                       </span>
                     </div>
                   </div>
@@ -243,9 +338,10 @@ export default function ForumPage() {
               </Link>
             ))
           ) : (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4 opacity-20">□</div>
+            <div className="flex flex-col items-center justify-center py-16">
+              <FiMessageSquare size={48} className="text-[#2A2A2A] mb-4" />
               <h3 className="text-lg text-[#666]">No discussions yet</h3>
+              <p className="text-sm text-[#444] mt-1">Be the first to start a conversation!</p>
             </div>
           )}
         </div>

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiFolder, FiUser, FiPlus, FiSearch, FiBell } from 'react-icons/fi';
+import { FiHome, FiFolder, FiUser, FiPlus, FiMessageCircle } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 
 export default function BottomNav() {
@@ -33,8 +33,8 @@ export default function BottomNav() {
               : 'text-[#666]'
           }`}
         >
-          <FiSearch size={20} />
-          <span className="text-[9px] mt-0.5">Search</span>
+          <FiFolder size={20} />
+          <span className="text-[9px] mt-0.5">Market</span>
         </Link>
 
         <Link
@@ -45,15 +45,15 @@ export default function BottomNav() {
         </Link>
 
         <Link
-          href="/collections"
+          href="/forum"
           className={`flex flex-col items-center justify-center flex-1 py-1 ${
-            pathname.startsWith('/collections')
+            pathname.startsWith('/forum')
               ? 'text-white'
               : 'text-[#666]'
           }`}
         >
-          <FiFolder size={20} />
-          <span className="text-[9px] mt-0.5">Vault</span>
+          <FiMessageCircle size={20} />
+          <span className="text-[9px] mt-0.5">Forum</span>
         </Link>
 
         <Link

@@ -25,7 +25,7 @@ CollectVault is a mobile-first collector portfolio manager built with Next.js 16
 - [x] 8 collection categories: Cards, Records, Stamps, Toys, Sports, NFT, Custom
 - [x] Camera support for item photos (capture="environment")
 - [x] Marketplace with 5% commission
-- [x] Community forum
+- [x] Community forum (temporarily disabled)
 - [x] Bottom navigation with center FAB button
 - [x] Build verification passed
 - [x] Pushed to remote repository
@@ -36,6 +36,9 @@ CollectVault is a mobile-first collector portfolio manager built with Next.js 16
 - [x] Professional dark/gold theme (#0A0A0A, #C0A080)
 - [x] Dashboard with subscription prompt for 2+ collections
 - [x] Updated BottomNav with gold accents, removed wishlist/trading
+- [x] Redesign marketplace with Mercari-style grid layout
+- [x] Remove avatars - use simple user icon
+- [x] Replace forum with Search in BottomNav
 
 ## Current Structure
 

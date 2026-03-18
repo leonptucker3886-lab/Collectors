@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiSearch, FiHeart, FiClock, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiHeart, FiClock, FiChevronRight, FiLoader } from 'react-icons/fi';
 
 interface Listing {
   id: string;
@@ -21,6 +21,8 @@ interface Listing {
   likedBy?: string[];
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export default function MarketplacePage() {
   const { user, profile } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
@@ -28,30 +30,81 @@ export default function MarketplacePage() {
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastDoc, setLastDoc] = useState<any>(null);
   const [likedItems, setLikedItems] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        const { db } = await import('../../lib/firebase');
-        const { collection, query, getDocs, orderBy } = await import('firebase/firestore');
-        
-        const snapshot = await getDocs(query(collection(db, 'listings'), orderBy('createdAt', 'desc')));
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Listing[];
-        setListings(data.filter(l => l.status === 'active'));
-      } catch (error) {
-        console.error('Error fetching listings:', error);
-        setListings([]);
-      } finally {
-        setLoading(false);
+  const fetchListings = useCallback(async (loadMore = false) => {
+    if (loadMore && (!lastDoc || loadingMore)) return;
+    
+    try {
+      const { db } = await import('../../lib/firebase');
+      const { collection, query, getDocs, orderBy, limit, where, startAfter } = await import('firebase/firestore');
+      
+      let q;
+      
+      if (category === 'all') {
+        q = query(
+          collection(db, 'listings'),
+          where('status', '==', 'active'),
+          orderBy('createdAt', 'desc'),
+          limit(ITEMS_PER_PAGE)
+        );
+      } else {
+        q = query(
+          collection(db, 'listings'),
+          where('status', '==', 'active'),
+          where('category', '==', category),
+          orderBy('createdAt', 'desc'),
+          limit(ITEMS_PER_PAGE)
+        );
       }
-    };
+      
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        setHasMore(false);
+        if (!loadMore) setListings([]);
+        return;
+      }
 
-    fetchListings();
-  }, []);
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Listing[];
+      
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+      
+      if (loadMore) {
+        setListings(prev => [...prev, ...data]);
+      } else {
+        setListings(data);
+      }
+      
+      setHasMore(snapshot.docs.length === ITEMS_PER_PAGE);
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      if (!loadMore) setListings([]);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [category, lastDoc, loadingMore]);
+
+  useEffect(() => {
+    setLoading(true);
+    setListings([]);
+    setLastDoc(null);
+    setHasMore(true);
+    fetchListings(false);
+  }, [category]);
+
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    fetchListings(true);
+  };
 
   const handleLike = async (listingId: string) => {
     if (!user) return;
@@ -67,8 +120,7 @@ export default function MarketplacePage() {
     .filter(listing => {
       const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         listing.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = category === 'all' || listing.category === category;
-      return matchesSearch && matchesCategory;
+      return matchesSearch;
     })
     .sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price;
@@ -153,59 +205,72 @@ export default function MarketplacePage() {
           <div className="w-6 h-6 border-2 border-[#C0A080] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filteredListings.length > 0 ? (
-        <div className="grid grid-cols-2 gap-px bg-[#1F1F1F]">
-          {filteredListings.map(listing => (
-            <Link
-              key={listing.id}
-              href={`/marketplace/${listing.id}`}
-              className="bg-[#0A0A0A] group"
-            >
-              <div className="relative aspect-square bg-[#141414] overflow-hidden">
-                {listing.images?.[0] ? (
-                  <img 
-                    src={listing.images[0]} 
-                    alt={listing.title} 
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl text-[#2A2A2A]">📦</div>
-                )}
-                
-                {/* Like button */}
-                <button
-                  onClick={(e) => { e.preventDefault(); handleLike(listing.id); }}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110"
-                >
-                  <FiHeart 
-                    size={14} 
-                    className={likedItems.includes(listing.id) ? 'text-red-500 fill-red-500' : 'text-white'} 
-                  />
-                </button>
+        <>
+          <div className="grid grid-cols-2 gap-px bg-[#1F1F1F]">
+            {filteredListings.map(listing => (
+              <Link
+                key={listing.id}
+                href={`/marketplace/${listing.id}`}
+                className="bg-[#0A0A0A] group"
+              >
+                <div className="relative aspect-square bg-[#141414] overflow-hidden">
+                  {listing.images?.[0] ? (
+                    <img 
+                      src={listing.images[0]} 
+                      alt={listing.title} 
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl text-[#2A2A2A]">📦</div>
+                  )}
+                  
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleLike(listing.id); }}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110"
+                  >
+                    <FiHeart 
+                      size={14} 
+                      className={likedItems.includes(listing.id) ? 'text-red-500 fill-red-500' : 'text-white'} 
+                    />
+                  </button>
 
-                {/* Sold overlay */}
-                {listing.status === 'sold' && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="text-white font-medium text-sm px-3 py-1 border border-white rounded">SOLD</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-3">
-                <p className="text-sm font-medium text-white truncate leading-tight">{listing.title}</p>
-                <p className="text-lg font-bold text-white mt-1">${listing.price.toLocaleString()}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-[10px] text-[#666] bg-[#141414] px-2 py-0.5 rounded capitalize">
-                    {listing.condition || 'Used'}
-                  </span>
+                  {listing.status === 'sold' && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-white font-medium text-sm px-3 py-1 border border-white rounded">SOLD</span>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[10px] text-[#444] mt-2 flex items-center gap-1">
-                  <FiClock size={10} />
-                  Just now
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+                
+                <div className="p-3">
+                  <p className="text-sm font-medium text-white truncate leading-tight">{listing.title}</p>
+                  <p className="text-lg font-bold text-white mt-1">${listing.price.toLocaleString()}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[10px] text-[#666] bg-[#141414] px-2 py-0.5 rounded capitalize">
+                      {listing.condition || 'Used'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-[#444] mt-2 flex items-center gap-1">
+                    <FiClock size={10} />
+                    Just now
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {hasMore && (
+            <div className="p-4 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-6 py-2 bg-[#1F1F1F] text-white rounded-full text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingMore && <FiLoader className="animate-spin" size={16} />}
+                Load More
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 px-4">
           <div className="text-6xl mb-4 opacity-20">🔍</div>
@@ -220,10 +285,8 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      {/* Bottom spacing */}
       <div className="h-24" />
 
-      {/* Sell FAB */}
       <Link
         href="/marketplace/sell"
         className="fixed bottom-20 left-1/2 -translate-x-1/2 px-8 py-3 bg-[#C0A080] rounded-full shadow-lg flex items-center gap-2 hover:scale-105 transition-transform z-30"
