@@ -124,13 +124,6 @@ export default function Dashboard() {
           </Link>
         </div>
       )}
-
-      <Link
-        href="/add"
-        className="fixed bottom-20 md:bottom-6 right-4 md:right-6 w-14 h-14 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform md:hidden"
-      >
-        <FiPlus size={24} />
-      </Link>
     </div>
   );
 }

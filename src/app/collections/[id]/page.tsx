@@ -116,13 +116,6 @@ export default function CollectionDetailPage() {
           </Button>
         </div>
       )}
-
-      <Button
-        onClick={() => router.push(`/add?collection=${collection.id}`)}
-        className="fixed bottom-20 md:bottom-6 right-4 md:right-6"
-      >
-        <FiPlus size={20} />
-      </Button>
     </div>
   );
 }
