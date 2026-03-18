@@ -3,6 +3,7 @@ import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "../context/AppContext";
 import { AuthProvider } from "../context/AuthContext";
+import BottomNav from "../components/layout/BottomNav";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         <AuthProvider>
           <AppProvider>
             {children}
+            <BottomNav />
           </AppProvider>
         </AuthProvider>
       </body>

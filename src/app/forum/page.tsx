@@ -226,20 +226,6 @@ export default function ForumPage() {
           <p className="text-[#666] text-sm">Be the first to start a discussion!</p>
         </div>
       )}
-
-      <div className="fixed bottom-16 left-0 right-0 bg-[#0F0F0F]/80 backdrop-blur-md border-t border-[#333] py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-around">
-          <Link href="/forum" className="flex flex-col items-center text-[#FF6B35]">
-            <FiMessageSquare size={20} />
-            <span className="text-xs mt-1">Forum</span>
-          </Link>
-          <div className="w-px h-8 bg-[#333]" />
-          <Link href="/marketplace" className="flex flex-col items-center text-[#666] hover:text-[#FF6B35]">
-            <FiArrowRight size={20} />
-            <span className="text-xs mt-1">Market</span>
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
