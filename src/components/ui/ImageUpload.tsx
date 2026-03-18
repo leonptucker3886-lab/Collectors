@@ -90,6 +90,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          capture="environment"
           multiple
           className="hidden"
           onChange={(e) => handleFileSelect(e.target.files)}
