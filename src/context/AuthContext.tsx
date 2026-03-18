@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { auth } from '../lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface AuthUser {
   uid: string;
@@ -24,48 +26,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isConfigured, setIsConfigured] = useState(false);
+  const isConfigured = true;
 
   useEffect(() => {
-    // Firebase is configured with hardcoded fallback values
-    setIsConfigured(true);
-    
-    // Dynamic import Firebase
-    import('../lib/firebase').then(({ auth, db }) => {
-      import('firebase/auth').then(({ onAuthStateChanged }) => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: unknown) => {
-          if (firebaseUser && typeof firebaseUser === 'object' && 'uid' in firebaseUser) {
-            const fu = firebaseUser as { uid: string; email: string | null; displayName: string | null; photoURL: string | null };
-            setUser({
-              uid: fu.uid,
-              email: fu.email,
-              displayName: fu.displayName,
-              photoURL: fu.photoURL,
-            });
-          } else {
-            setUser(null);
-          }
-          setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+      if (firebaseUser) {
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
         });
-        return () => unsubscribe();
-      });
-    }).catch(() => {
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (!isConfigured) throw new Error('Firebase not configured');
-    const { auth } = await import('../lib/firebase');
     const { signInWithEmailAndPassword } = await import('firebase/auth');
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    if (!isConfigured) throw new Error('Firebase not configured');
-    const { auth, db } = await import('../lib/firebase');
     const { createUserWithEmailAndPassword } = await import('firebase/auth');
     const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+    const { db } = await import('../lib/firebase');
     
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await setDoc(doc(db, 'users', result.user.uid), {
@@ -80,16 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    if (!isConfigured) throw new Error('Firebase not configured');
-    const { auth } = await import('../lib/firebase');
     const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
   };
 
   const logout = async () => {
-    if (!isConfigured) return;
-    const { auth } = await import('../lib/firebase');
     const { signOut } = await import('firebase/auth');
     await signOut(auth);
     setUser(null);
