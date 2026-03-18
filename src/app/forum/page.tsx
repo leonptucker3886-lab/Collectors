@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { FiMessageSquare, FiPlus, FiUser, FiThumbsUp, FiArrowRight } from 'react-icons/fi';
 
 interface Post {
@@ -31,6 +29,9 @@ export default function ForumPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        const { db } = await import('../../lib/firebase');
+        const { collection, query, orderBy, getDocs } = await import('firebase/firestore');
+        
         const q = query(collection(db, 'forum_posts'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({
@@ -54,6 +55,9 @@ export default function ForumPage() {
 
     setSubmitting(true);
     try {
+      const { db } = await import('../../lib/firebase');
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      
       await addDoc(collection(db, 'forum_posts'), {
         title: newPost.title,
         content: newPost.content,

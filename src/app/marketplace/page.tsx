@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { FiSearch, FiPlus, FiTag, FiUser } from 'react-icons/fi';
 
 interface Listing {
@@ -33,6 +31,9 @@ export default function MarketplacePage() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
+        const { db } = await import('../../lib/firebase');
+        const { collection, query, where, getDocs, orderBy } = await import('firebase/firestore');
+        
         const q = query(
           collection(db, 'listings'),
           where('status', '==', 'active'),
@@ -51,8 +52,12 @@ export default function MarketplacePage() {
       }
     };
 
-    fetchListings();
-  }, []);
+    if (user) {
+      fetchListings();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

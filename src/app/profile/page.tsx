@@ -2,18 +2,27 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { Button, Select } from '../../components/ui';
 import storage from '../../lib/storage';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FiDownload, FiUpload, FiSettings, FiUser, FiFileText, FiTrash2, FiHelpCircle } from 'react-icons/fi';
+import { FiDownload, FiUpload, FiSettings, FiUser, FiFileText, FiTrash2, FiHelpCircle, FiLogOut } from 'react-icons/fi';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { state, updateSettings, getDashboardStats } = useApp();
+  const { user, logout } = useAuth();
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [importing, setImporting] = useState(false);
   const stats = getDashboardStats();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   const handleExportPDF = async () => {
     const doc = new jsPDF();
@@ -261,6 +270,18 @@ export default function ProfilePage() {
           </div>
           <span className="text-[#666]">→</span>
         </Link>
+
+        {user && (
+          <button
+            onClick={handleLogout}
+            className="w-full p-4 bg-[#242424] rounded-xl flex items-center justify-between hover:bg-[#FF4757]/10"
+          >
+            <div className="flex items-center gap-3">
+              <FiLogOut size={20} className="text-[#FF4757]" />
+              <span className="text-[#FF4757]">Sign Out</span>
+            </div>
+          </button>
+        )}
       </div>
 
       <div className="text-center text-xs text-[#666] py-4">
