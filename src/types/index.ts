@@ -1,5 +1,84 @@
 export type ItemCondition = 'mint' | 'near_mint' | 'excellent' | 'good' | 'fair' | 'poor';
 
+export interface UserProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  avatar: string;
+  avatarColor: string;
+  bio: string;
+  location: string;
+  website: string;
+  joinedAt: string;
+  points: number;
+  level: number;
+  badges: Badge[];
+  stats: UserStats;
+  theme: 'purple' | 'blue' | 'green' | 'pink' | 'orange';
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earnedAt: string;
+}
+
+export interface UserStats {
+  itemsCollected: number;
+  collectionsCreated: number;
+  forumPosts: number;
+  marketplaceSales: number;
+  tradesCompleted: number;
+  likesReceived: number;
+}
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  minPoints: number;
+  maxPoints: number;
+  icon: string;
+}
+
+export const LEVELS: LevelInfo[] = [
+  { level: 1, title: 'Newcomer', minPoints: 0, maxPoints: 100, icon: '🌱' },
+  { level: 2, title: 'Collector', minPoints: 100, maxPoints: 500, icon: '⭐' },
+  { level: 3, title: 'Enthusiast', minPoints: 500, maxPoints: 1500, icon: '🌟' },
+  { level: 4, title: 'Connoisseur', minPoints: 1500, maxPoints: 5000, icon: '💎' },
+  { level: 5, title: 'Expert', minPoints: 5000, maxPoints: 15000, icon: '🏆' },
+  { level: 6, title: 'Master', minPoints: 15000, maxPoints: 50000, icon: '👑' },
+  { level: 7, title: 'Legend', minPoints: 50000, maxPoints: 999999, icon: '🔥' },
+];
+
+export const BADGES: Omit<Badge, 'earnedAt'>[] = [
+  { id: 'first_item', name: 'First Find', description: 'Added your first item', icon: '🎯' },
+  { id: 'ten_items', name: 'Building Collection', description: 'Added 10 items', icon: '📦' },
+  { id: 'hundred_items', name: 'Hoarder', description: 'Added 100 items', icon: '🏠' },
+  { id: 'first_collection', name: 'Curator', description: 'Created your first collection', icon: '📚' },
+  { id: 'forum_post', name: 'Voice', description: 'Made your first forum post', icon: '💬' },
+  { id: 'ten_forum_posts', name: 'Community Leader', description: 'Made 10 forum posts', icon: '🎤' },
+  { id: 'first_sale', name: 'Entrepreneur', description: 'Sold your first item', icon: '💰' },
+  { id: 'ten_sales', name: 'Tycoon', description: 'Sold 10 items', icon: '💎' },
+  { id: 'first_trade', name: 'Trader', description: 'Completed your first trade', icon: '🔄' },
+  { id: 'verified', name: 'Verified', description: 'Verified collector', icon: '✅' },
+  { id: 'streak_7', name: 'Dedicated', description: '7 day login streak', icon: '🔥' },
+  { id: 'streak_30', name: 'Committed', description: '30 day login streak', icon: '⚡' },
+];
+
+export const AVATARS = [
+  '🐻', '🦊', '🐼', '🦁', '🐯', '🦊', '🐨', '🐰', '🦄', '🐲',
+  '🎮', '🎨', '🎭', '🎪', '🎯', '🎲', '🎸', '🎺', '🎻', '🥎',
+  '⚽', '🏀', '🏈', '🎾', '🏐', '🎱', '🏓', '🏸', '🥊', '🥇',
+  '🚀', '🌟', '💎', '🔮', '🎁', '🏆', '👑', '💍', '🎖️', '⭐',
+];
+
+export const AVATAR_COLORS = [
+  '#A855F7', '#6366F1', '#3B82F6', '#10B981', '#F59E0B',
+  '#EF4444', '#EC4899', '#8B5CF6', '#06B6D4', '#84CC16',
+];
+
 export interface CustomField {
   id: string;
   name: string;

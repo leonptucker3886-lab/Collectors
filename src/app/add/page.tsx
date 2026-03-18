@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { collectionTemplates } from '../../data/templates';
 import { Button, Input, Select, Textarea, ImageUpload } from '../../components/ui';
 import { ItemCondition } from '../../types';
@@ -12,6 +13,7 @@ function AddItemContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { state, createItem } = useApp();
+  const { addPoints, earnBadge, profile } = useAuth();
   
   const collectionId = searchParams.get('collection');
   const collection = state.collections.find((c) => c.id === collectionId);
@@ -62,6 +64,18 @@ function AddItemContent() {
         isForSale: formData.isForSale,
         askingPrice: formData.askingPrice ? parseFloat(formData.askingPrice) : undefined,
       });
+      
+      await addPoints(5);
+      
+      if (profile) {
+        const currentItems = profile.stats?.itemsCollected || 0;
+        if (currentItems === 0) {
+          await earnBadge('first_item');
+        } else if (currentItems >= 9) {
+          await earnBadge('ten_items');
+        }
+      }
+      
       router.push(`/collections/${collectionId}`);
     } catch (error) {
       console.error(error);
