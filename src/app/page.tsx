@@ -51,7 +51,7 @@ export default function Dashboard() {
             {stats.categoryBreakdown.map((cat) => (
               <div key={cat.category} className="flex items-center justify-between bg-[#242424] rounded-lg p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#FF6B35]/20 flex items-center justify-center text-[#FF6B35]">
+                  <div className="w-8 h-8 rounded-lg bg-[#A855F7]/20 flex items-center justify-center text-[#A855F7]">
                     <FiFolder size={16} />
                   </div>
                   <div>
@@ -72,7 +72,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Recently Added</h2>
-            <Link href="/collections" className="text-sm text-[#FF6B35] flex items-center gap-1">
+            <Link href="/collections" className="text-sm text-[#A855F7] flex items-center gap-1">
               View all <FiArrowRight size={14} />
             </Link>
           </div>
@@ -92,7 +92,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Your Collections</h2>
-            <Link href="/collections" className="text-sm text-[#FF6B35] flex items-center gap-1">
+            <Link href="/collections" className="text-sm text-[#A855F7] flex items-center gap-1">
               View all <FiArrowRight size={14} />
             </Link>
           </div>
@@ -117,7 +117,7 @@ export default function Dashboard() {
           <p className="text-[#666] text-sm mb-4">Start by creating your first collection</p>
           <Link
             href="/collections/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg font-medium"
           >
             <FiPlus size={18} />
             Create Collection

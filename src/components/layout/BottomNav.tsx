@@ -28,7 +28,7 @@ export default function BottomNav() {
               href={item.href}
               className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
                 isActive
-                  ? 'text-[#FF6B35] bg-[#FF6B35]/10'
+                  ? 'text-[#A855F7] bg-[#A855F7]/10'
                   : 'text-[#666] hover:text-[#A0A0A0]'
               }`}
             >
@@ -40,7 +40,7 @@ export default function BottomNav() {
         
         <Link
           href="/marketplace/sell"
-          className="flex flex-col items-center justify-center w-12 h-12 -mt-4 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] rounded-full shadow-lg hover:scale-105 transition-transform"
+          className="flex flex-col items-center justify-center w-12 h-12 -mt-4 bg-gradient-to-r from-[#A855F7] to-[#6366F1] rounded-full shadow-lg hover:scale-105 transition-transform"
         >
           <FiPlus size={24} className="text-white" />
         </Link>
@@ -49,7 +49,7 @@ export default function BottomNav() {
           href="/forum"
           className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
             pathname.startsWith('/forum')
-              ? 'text-[#FF6B35] bg-[#FF6B35]/10'
+              ? 'text-[#A855F7] bg-[#A855F7]/10'
               : 'text-[#666] hover:text-[#A0A0A0]'
           }`}
         >
@@ -61,7 +61,7 @@ export default function BottomNav() {
           href="/marketplace"
           className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
             pathname.startsWith('/marketplace')
-              ? 'text-[#FF6B35] bg-[#FF6B35]/10'
+              ? 'text-[#A855F7] bg-[#A855F7]/10'
               : 'text-[#666] hover:text-[#A0A0A0]'
           }`}
         >
@@ -73,7 +73,7 @@ export default function BottomNav() {
           href={user ? '/profile' : '/login'}
           className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
             pathname.startsWith('/profile') || pathname.startsWith('/login')
-              ? 'text-[#FF6B35] bg-[#FF6B35]/10'
+              ? 'text-[#A855F7] bg-[#A855F7]/10'
               : 'text-[#666] hover:text-[#A0A0A0]'
           }`}
         >

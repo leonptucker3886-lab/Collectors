@@ -76,7 +76,7 @@ export default function HelpPage() {
               placeholder="Search help articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1A1A1A] border border-[#333] rounded-xl py-3 pl-10 pr-4 text-white placeholder-[#666] focus:border-[#FF6B35] focus:outline-none"
+              className="w-full bg-[#1A1A1A] border border-[#333] rounded-xl py-3 pl-10 pr-4 text-white placeholder-[#666] focus:border-[#A855F7] focus:outline-none"
             />
           </div>
         </div>
@@ -85,14 +85,14 @@ export default function HelpPage() {
       <main className="p-4 space-y-6">
         <section>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <FiBook className="text-[#FF6B35]" />
+            <FiBook className="text-[#A855F7]" />
             Quick Guides
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {guides.map((guide, index) => (
               <div
                 key={index}
-                className="bg-[#1A1A1A] border border-[#333] rounded-xl p-4 hover:border-[#FF6B35] transition-colors cursor-pointer"
+                className="bg-[#1A1A1A] border border-[#333] rounded-xl p-4 hover:border-[#A855F7] transition-colors cursor-pointer"
               >
                 <span className="text-2xl mb-2 block">{guide.icon}</span>
                 <h3 className="font-medium text-sm">{guide.title}</h3>
@@ -104,7 +104,7 @@ export default function HelpPage() {
 
         <section>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <FiHelpCircle className="text-[#FF6B35]" />
+            <FiHelpCircle className="text-[#A855F7]" />
             Frequently Asked Questions
           </h2>
           <div className="space-y-2">
@@ -119,7 +119,7 @@ export default function HelpPage() {
                 >
                   <span className="font-medium text-sm pr-4">{faq.question}</span>
                   {openFaq === index ? (
-                    <FiChevronUp className="text-[#FF6B35]" />
+                    <FiChevronUp className="text-[#A855F7]" />
                   ) : (
                     <FiChevronDown className="text-[#666]" />
                   )}
@@ -134,7 +134,7 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className="bg-gradient-to-r from-[#FF6B35]/20 to-[#F7931E]/20 border border-[#FF6B35]/30 rounded-xl p-4">
+        <section className="bg-gradient-to-r from-[#A855F7]/20 to-[#6366F1]/20 border border-[#A855F7]/30 rounded-xl p-4">
           <h2 className="font-semibold mb-2">Still need help?</h2>
           <p className="text-sm text-[#A0A0A0] mb-4">
             Can&apos;t find what you&apos;re looking for? Contact us or ask the community.
@@ -142,14 +142,14 @@ export default function HelpPage() {
           <div className="flex gap-3">
             <Link
               href="/forum"
-              className="flex-1 bg-[#FF6B35] text-white py-2 px-4 rounded-lg text-center text-sm font-medium hover:bg-[#FF6B35]/90 transition-colors"
+              className="flex-1 bg-[#A855F7] text-white py-2 px-4 rounded-lg text-center text-sm font-medium hover:bg-[#A855F7]/90 transition-colors"
             >
               <FiMessageCircle className="inline mr-2" />
               Ask Forum
             </Link>
             <a
               href="mailto:support@collectvault.app"
-              className="flex-1 bg-[#1A1A1A] border border-[#333] text-white py-2 px-4 rounded-lg text-center text-sm font-medium hover:border-[#FF6B35] transition-colors"
+              className="flex-1 bg-[#1A1A1A] border border-[#333] text-white py-2 px-4 rounded-lg text-center text-sm font-medium hover:border-[#A855F7] transition-colors"
             >
               <FiMail className="inline mr-2" />
               Email Us

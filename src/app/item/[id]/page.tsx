@@ -62,7 +62,7 @@ export default function ItemDetailPage() {
     near_mint: '#4ECDC4',
     excellent: '#A0A0A0',
     good: '#A0A0A0',
-    fair: '#F7931E',
+    fair: '#6366F1',
     poor: '#FF4757',
   };
 
@@ -190,7 +190,7 @@ export default function ItemDetailPage() {
               </span>
             )}
             {item.isForSale && (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-[#FF6B35]/20 text-[#FF6B35]">
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-[#A855F7]/20 text-[#A855F7]">
                 ${item.askingPrice}
               </span>
             )}

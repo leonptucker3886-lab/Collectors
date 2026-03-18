@@ -80,7 +80,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
       <label className="block text-sm text-[#A0A0A0]">Photos</label>
       <div
         className={`relative border-2 border-dashed rounded-xl p-4 transition-colors ${
-          isDragging ? 'border-[#FF6B35] bg-[#FF6B35]/10' : 'border-[#333] hover:border-[#666]'
+          isDragging ? 'border-[#A855F7] bg-[#A855F7]/10' : 'border-[#333] hover:border-[#666]'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -121,7 +121,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
             {images.length < maxImages && (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-lg border-2 border-dashed border-[#333] flex items-center justify-center text-[#666] hover:border-[#FF6B35] hover:text-[#FF6B35] transition-colors"
+                className="aspect-square rounded-lg border-2 border-dashed border-[#333] flex items-center justify-center text-[#666] hover:border-[#A855F7] hover:text-[#A855F7] transition-colors"
               >
                 <FiCamera size={20} />
               </button>

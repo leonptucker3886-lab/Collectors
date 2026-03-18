@@ -71,7 +71,7 @@ export default function MarketplacePage() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
-        <div className="text-[#FF6B35]">Loading...</div>
+        <div className="text-[#A855F7]">Loading...</div>
       </div>
     );
   }
@@ -81,7 +81,7 @@ export default function MarketplacePage() {
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-white mb-4">Sign in to view marketplace</h2>
-          <Link href="/login" className="px-6 py-3 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg">
+          <Link href="/login" className="px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg">
             Sign In
           </Link>
         </div>
@@ -95,7 +95,7 @@ export default function MarketplacePage() {
         <h1 className="text-xl font-semibold">Marketplace</h1>
         <Link
           href="/marketplace/sell"
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg text-sm font-medium"
         >
           <FiPlus size={18} />
           Sell
@@ -110,7 +110,7 @@ export default function MarketplacePage() {
             placeholder="Search marketplace..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#FF6B35]"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7]"
           />
         </div>
       </div>
@@ -122,7 +122,7 @@ export default function MarketplacePage() {
             onClick={() => setCategory(cat)}
             className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
               category === cat
-                ? 'bg-[#FF6B35] text-white'
+                ? 'bg-[#A855F7] text-white'
                 : 'bg-[#242424] text-[#A0A0A0] hover:text-white'
             }`}
           >
@@ -169,7 +169,7 @@ export default function MarketplacePage() {
           </div>
           <h3 className="text-lg font-medium text-white mb-2">No listings found</h3>
           <p className="text-[#666] text-sm mb-4">Be the first to list something!</p>
-          <Link href="/marketplace/sell" className="text-[#FF6B35]">
+          <Link href="/marketplace/sell" className="text-[#A855F7]">
             Start Selling →
           </Link>
         </div>

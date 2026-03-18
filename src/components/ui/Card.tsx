@@ -38,7 +38,7 @@ export function StatCard({ label, value, subValue, icon, trend }: StatCardProps)
   return (
     <Card className="flex items-center gap-3">
       {icon && (
-        <div className="w-10 h-10 rounded-lg bg-[#FF6B35]/20 flex items-center justify-center text-[#FF6B35]">
+        <div className="w-10 h-10 rounded-lg bg-[#A855F7]/20 flex items-center justify-center text-[#A855F7]">
           {icon}
         </div>
       )}
@@ -55,7 +55,7 @@ export function StatCard({ label, value, subValue, icon, trend }: StatCardProps)
 
 export function HeroCard({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br from-[#FF6B35] to-[#F7931E] rounded-2xl p-6 ${className}`}>
+    <div className={`relative overflow-hidden bg-gradient-to-br from-[#A855F7] to-[#6366F1] rounded-2xl p-6 ${className}`}>
       <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
       <div className="relative z-10">{children}</div>
     </div>

@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CollectVault - Collector Marketplace",
-  description: "Buy, sell, and trade collectibles. Join the community!",
+  title: "CollectVault - Your Treasure Awaits",
+  description: "Track, trade, and treasure your collectibles. The ultimate collector's companion!",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 

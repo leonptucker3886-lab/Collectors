@@ -41,7 +41,7 @@ export default function WishlistPage() {
 
   const priorityColors = {
     high: '#FF4757',
-    medium: '#F7931E',
+    medium: '#6366F1',
     low: '#4ECDC4',
   };
 
@@ -169,7 +169,7 @@ function Textarea({ label, value, onChange, placeholder }: { label: string; valu
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#FF6B35]"
+        className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7]"
         rows={2}
       />
     </div>

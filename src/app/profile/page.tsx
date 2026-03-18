@@ -143,7 +143,7 @@ export default function ProfilePage() {
       <h1 className="text-xl font-semibold">Profile</h1>
 
       <div className="p-4 bg-[#242424] rounded-xl flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#F7931E] flex items-center justify-center text-2xl font-bold text-white">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#A855F7] to-[#6366F1] flex items-center justify-center text-2xl font-bold text-white">
           CV
         </div>
         <div>
@@ -177,7 +177,7 @@ export default function ProfilePage() {
             className="w-full p-4 bg-[#242424] rounded-xl flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <FiDownload size={20} className="text-[#FF6B35]" />
+              <FiDownload size={20} className="text-[#A855F7]" />
               <span className="text-white">Export Data</span>
             </div>
             <span className="text-[#666]">→</span>
@@ -244,7 +244,7 @@ export default function ProfilePage() {
               onChange={async (e) => {
                 await updateSettings({ ...state.settings, darkMode: e.target.checked });
               }}
-              className="w-5 h-5 rounded bg-[#1A1A1A] border-[#333] text-[#FF6B35] focus:ring-[#FF6B35]"
+              className="w-5 h-5 rounded bg-[#1A1A1A] border-[#333] text-[#A855F7] focus:ring-[#A855F7]"
             />
           </label>
           
@@ -256,7 +256,7 @@ export default function ProfilePage() {
               onChange={async (e) => {
                 await updateSettings({ ...state.settings, notifications: e.target.checked });
               }}
-              className="w-5 h-5 rounded bg-[#1A1A1A] border-[#333] text-[#FF6B35] focus:ring-[#FF6B35]"
+              className="w-5 h-5 rounded bg-[#1A1A1A] border-[#333] text-[#A855F7] focus:ring-[#A855F7]"
             />
           </label>
         </div>

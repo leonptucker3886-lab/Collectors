@@ -53,7 +53,7 @@ export default function NewCollectionPage() {
                 }}
                 className={`p-4 rounded-xl border-2 transition-all text-left ${
                   selectedTemplate === template.id
-                    ? 'border-[#FF6B35] bg-[#FF6B35]/10'
+                    ? 'border-[#A855F7] bg-[#A855F7]/10'
                     : 'border-[#333] bg-[#242424] hover:border-[#666]'
                 }`}
               >
@@ -98,7 +98,7 @@ export default function NewCollectionPage() {
                     .find((t) => t.id === selectedTemplate)
                     ?.fields.map((field) => (
                       <p key={field.id} className="text-xs text-[#666]">
-                        • {field.name} {field.required && <span className="text-[#FF6B35]">*</span>}
+                        • {field.name} {field.required && <span className="text-[#A855F7]">*</span>}
                       </p>
                     ))}
                 </div>

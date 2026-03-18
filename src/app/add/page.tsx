@@ -190,7 +190,7 @@ function AddItemContent() {
                 type="checkbox"
                 checked={formData.isForTrade}
                 onChange={(e) => setFormData({ ...formData, isForTrade: e.target.checked })}
-                className="w-4 h-4 rounded border-[#333] bg-[#1A1A1A] text-[#FF6B35] focus:ring-[#FF6B35]"
+                className="w-4 h-4 rounded border-[#333] bg-[#1A1A1A] text-[#A855F7] focus:ring-[#A855F7]"
               />
               <span className="text-sm text-white">Available for Trade</span>
             </label>
@@ -199,7 +199,7 @@ function AddItemContent() {
                 type="checkbox"
                 checked={formData.isForSale}
                 onChange={(e) => setFormData({ ...formData, isForSale: e.target.checked })}
-                className="w-4 h-4 rounded border-[#333] bg-[#1A1A1A] text-[#FF6B35] focus:ring-[#FF6B35]"
+                className="w-4 h-4 rounded border-[#333] bg-[#1A1A1A] text-[#A855F7] focus:ring-[#A855F7]"
               />
               <span className="text-sm text-white">For Sale</span>
             </label>

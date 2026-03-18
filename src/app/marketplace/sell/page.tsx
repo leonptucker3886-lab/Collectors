@@ -30,7 +30,7 @@ export default function SellPage() {
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-white mb-4">Sign in to sell</h2>
-          <Link href="/login" className="px-6 py-3 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg">
+          <Link href="/login" className="px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg">
             Sign In
           </Link>
         </div>

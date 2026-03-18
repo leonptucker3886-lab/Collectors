@@ -27,7 +27,7 @@ export default function AppLayout({ children, title, showBack, actions, showLogo
           )}
           {showLogo ? (
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#F7931E] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#A855F7] to-[#6366F1] flex items-center justify-center">
                 <span className="text-white font-bold text-sm">CV</span>
               </div>
               <span className="text-lg font-semibold">{title || 'CollectVault'}</span>

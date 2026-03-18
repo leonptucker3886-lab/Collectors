@@ -16,7 +16,7 @@ const conditionColors: Record<ItemCondition, string> = {
   near_mint: '#4ECDC4',
   excellent: '#A0A0A0',
   good: '#A0A0A0',
-  fair: '#F7931E',
+  fair: '#6366F1',
   poor: '#FF4757',
 };
 
@@ -60,7 +60,7 @@ export default function ItemCard({ item, onClick, onEdit, onDelete }: ItemCardPr
           </div>
         )}
         {item.isForSale && (
-          <div className="absolute top-2 right-2 px-2 py-1 bg-[#FF6B35]/90 rounded-full text-xs font-medium">
+          <div className="absolute top-2 right-2 px-2 py-1 bg-[#A855F7]/90 rounded-full text-xs font-medium">
             ${item.askingPrice}
           </div>
         )}
@@ -99,7 +99,7 @@ export default function ItemCard({ item, onClick, onEdit, onDelete }: ItemCardPr
           {onEdit && (
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="p-2 bg-black/60 rounded-full text-white hover:bg-[#FF6B35]"
+              className="p-2 bg-black/60 rounded-full text-white hover:bg-[#A855F7]"
             >
               <FiEdit2 size={14} />
             </button>

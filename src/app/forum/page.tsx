@@ -103,7 +103,7 @@ export default function ForumPage() {
         {user && (
           <button
             onClick={() => setShowNewPost(!showNewPost)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg text-sm font-medium"
           >
             <FiPlus size={18} />
             New Post
@@ -114,7 +114,7 @@ export default function ForumPage() {
       {!user && (
         <div className="bg-[#242424] rounded-xl p-4 text-center">
           <p className="text-[#666] text-sm">Sign in to post and comment</p>
-          <Link href="/login" className="text-[#FF6B35] text-sm mt-2 inline-block">
+          <Link href="/login" className="text-[#A855F7] text-sm mt-2 inline-block">
             Sign In →
           </Link>
         </div>
@@ -128,21 +128,21 @@ export default function ForumPage() {
             placeholder="Post title"
             value={newPost.title}
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#FF6B35]"
+            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7]"
             required
           />
           <textarea
             placeholder="What's on your mind?"
             value={newPost.content}
             onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#FF6B35] resize-none"
+            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7] resize-none"
             rows={4}
             required
           />
           <select
             value={newPost.category}
             onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white focus:outline-none focus:border-[#FF6B35]"
+            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white focus:outline-none focus:border-[#A855F7]"
           >
             {categories.filter(c => c !== 'all').map(cat => (
               <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
@@ -159,7 +159,7 @@ export default function ForumPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-lg font-medium"
+              className="flex-1 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg font-medium"
             >
               {submitting ? 'Posting...' : 'Post'}
             </button>
@@ -174,7 +174,7 @@ export default function ForumPage() {
             onClick={() => setCategory(cat)}
             className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
               category === cat
-                ? 'bg-[#FF6B35] text-white'
+                ? 'bg-[#A855F7] text-white'
                 : 'bg-[#242424] text-[#A0A0A0] hover:text-white'
             }`}
           >
@@ -195,7 +195,7 @@ export default function ForumPage() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#FF6B35]/20 text-[#FF6B35]">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#A855F7]/20 text-[#A855F7]">
                     {post.category}
                   </span>
                   <h3 className="font-medium text-white mt-2">{post.title}</h3>

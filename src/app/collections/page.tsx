@@ -25,7 +25,7 @@ export default function CollectionsPage() {
             placeholder="Search collections..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#FF6B35]"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7]"
           />
         </div>
         <button
@@ -57,7 +57,7 @@ export default function CollectionsPage() {
           <p className="text-[#666] mb-6">Create your first collection to start cataloging</p>
           <Link
             href="/collections/new"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] text-white rounded-xl font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-xl font-medium"
           >
             <FiPlus size={20} />
             Create Collection
