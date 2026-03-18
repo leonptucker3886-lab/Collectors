@@ -7,7 +7,7 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/landmark');
+    router.replace('/collections');
   }, [router]);
 
   return (
