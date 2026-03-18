@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiGrid, FiPlus, FiTag, FiUser, FiMapPin } from 'react-icons/fi';
+import { FiGrid, FiPlus, FiUser, FiMapPin, FiTrendingUp } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 
 export default function BottomNav() {
@@ -45,15 +45,15 @@ export default function BottomNav() {
         </Link>
 
         <Link
-          href="/marketplace"
+          href="/"
           className={`flex flex-col items-center justify-center flex-1 py-1 ${
-            pathname.startsWith('/marketplace')
+            pathname === '/'
               ? 'text-white'
               : 'text-[#666]'
           }`}
         >
-          <FiTag size={20} />
-          <span className="text-[9px] mt-0.5">Sell</span>
+          <FiTrendingUp size={20} />
+          <span className="text-[9px] mt-0.5">Stats</span>
         </Link>
 
         <Link
