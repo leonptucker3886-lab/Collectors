@@ -2,7 +2,7 @@
 
 ## Current State
 
-**App Status**: MVP Complete - Build Ready
+**App Status**: Complete - Deployed
 
 CollectVault is a mobile-first collector portfolio manager built with Next.js 16, TypeScript, and Tailwind CSS. It features a dark theme with orange accents, offline-first architecture using localForage, and PWA-ready structure.
 
@@ -21,6 +21,14 @@ CollectVault is a mobile-first collector portfolio manager built with Next.js 16
 - [x] Export to PDF/CSV/JSON
 - [x] Import/backup functionality
 - [x] Dark theme UI with mobile-first design
+- [x] Firebase authentication (email + Google)
+- [x] 8 collection categories: Cards, Records, Stamps, Toys, Sports, NFT, Custom
+- [x] Camera support for item photos (capture="environment")
+- [x] Marketplace with 5% commission
+- [x] Community forum
+- [x] Bottom navigation with center FAB button
+- [x] Build verification passed
+- [x] Pushed to remote repository
 
 ## Current Structure
 
@@ -65,3 +73,4 @@ The MVP is complete. Next steps for enhancement:
 | Date | Changes |
 |------|---------|
 | Initial | Built CollectVault MVP - collector portfolio app with collections, items, photos, value tracking, wishlist, PDF/CSV export |
+| Latest | Added login/auth, marketplace with 5% commission, community forum, camera support, updated categories, verified build, pushed to remote |
