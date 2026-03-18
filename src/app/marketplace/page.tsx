@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { FiSearch, FiPlus, FiFilter, FiTag, FiMessageSquare, FiUser, FiDollarSign } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiTag, FiUser } from 'react-icons/fi';
 
 interface Listing {
   id: string;
