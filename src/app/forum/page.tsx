@@ -18,7 +18,7 @@ interface Post {
 }
 
 export default function ForumPage() {
-  const { user } = useAuth();
+  const { user, profile, addPoints, earnBadge } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -64,10 +64,23 @@ export default function ForumPage() {
         category: newPost.category,
         authorId: user.uid,
         authorName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        authorAvatar: profile?.avatar || '👤',
         likes: 0,
         createdAt: serverTimestamp(),
         commentCount: 0,
       });
+      
+      await addPoints(2);
+      
+      if (profile) {
+        const currentPosts = profile.stats?.forumPosts || 0;
+        if (currentPosts === 0) {
+          await earnBadge('forum_post');
+        } else if (currentPosts >= 9) {
+          await earnBadge('ten_forum_posts');
+        }
+      }
+      
       setNewPost({ title: '', content: '', category: 'general' });
       setShowNewPost(false);
       window.location.reload();
