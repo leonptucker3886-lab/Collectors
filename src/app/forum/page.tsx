@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiMessageSquare, FiPlus, FiUser, FiThumbsUp, FiArrowRight } from 'react-icons/fi';
+import { FiMessageSquare, FiPlus, FiUser, FiThumbsUp, FiArrowRight, FiClock, FiStar } from 'react-icons/fi';
 
 interface Post {
   id: string;
@@ -11,11 +11,22 @@ interface Post {
   content: string;
   authorId: string;
   authorName: string;
+  authorAvatar: string;
   category: string;
   likes: number;
   createdAt: any;
   commentCount: number;
+  isPinned?: boolean;
 }
+
+const FORUM_SECTIONS = [
+  { id: 'general', label: 'General Discussion', icon: '💬', description: 'Talk about anything collecting' },
+  { id: 'reviews', label: 'Reviews & Guides', icon: '⭐', description: 'Share your expert knowledge' },
+  { id: 'news', label: 'Market News', icon: '📰', description: 'Latest trends and prices' },
+  { id: 'help', label: 'Q&A Help', icon: '❓', description: 'Ask the community' },
+  { id: 'trades', label: 'Trade Talk', icon: '🔄', description: 'Buying, selling, trading' },
+  { id: 'showcase', label: 'Showcase', icon: '🏆', description: 'Show off your collection' },
+];
 
 export default function ForumPage() {
   const { user, profile, addPoints, earnBadge } = useAuth();
@@ -76,8 +87,6 @@ export default function ForumPage() {
         const currentPosts = profile.stats?.forumPosts || 0;
         if (currentPosts === 0) {
           await earnBadge('forum_post');
-        } else if (currentPosts >= 9) {
-          await earnBadge('ten_forum_posts');
         }
       }
       
@@ -95,84 +104,111 @@ export default function ForumPage() {
     category === 'all' || post.category === category
   );
 
-  const categories = ['all', 'general', 'cards', 'records', 'toys', 'sports', 'help', 'trades'];
+  const pinnedPosts = filteredPosts.filter(p => p.isPinned);
+  const regularPosts = filteredPosts.filter(p => !p.isPinned);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
+    if (hours < 1) return 'Just now';
+    if (hours < 24) return `${hours}h ago`;
     if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
+    if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
   };
 
+  const getSectionInfo = (catId: string) => FORUM_SECTIONS.find(s => s.id === catId) || FORUM_SECTIONS[0];
+
   return (
-    <div className="space-y-4 pb-20">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Community Forum</h1>
-        {user && (
+    <div className="min-h-screen bg-white text-gray-900 pb-24">
+      <div className="sticky top-0 bg-white z-30 border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-xl font-bold">Community</h1>
+          {user && (
+            <button
+              onClick={() => setShowNewPost(!showNewPost)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#A855F7] text-white rounded-full text-sm font-medium"
+            >
+              <FiPlus size={18} />
+              New Post
+            </button>
+          )}
+        </div>
+        
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           <button
-            onClick={() => setShowNewPost(!showNewPost)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg text-sm font-medium"
+            onClick={() => setCategory('all')}
+            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
+              category === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
           >
-            <FiPlus size={18} />
-            New Post
+            All
           </button>
-        )}
+          {FORUM_SECTIONS.map(section => (
+            <button
+              key={section.id}
+              onClick={() => setCategory(section.id)}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap flex items-center gap-1 ${
+                category === section.id ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              <span>{section.icon}</span>
+              {section.label.split(' ')[0]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {!user && (
-        <div className="bg-[#242424] rounded-xl p-4 text-center">
-          <p className="text-[#666] text-sm">Sign in to post and comment</p>
-          <Link href="/login" className="text-[#A855F7] text-sm mt-2 inline-block">
-            Sign In →
-          </Link>
+        <div className="mx-4 mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
+          <p className="text-sm text-gray-600">Join the discussion! <Link href="/login" className="text-[#A855F7] font-medium">Sign in</Link> to post.</p>
         </div>
       )}
 
       {showNewPost && user && (
-        <form onSubmit={handleCreatePost} className="bg-[#242424] rounded-xl p-4 space-y-4">
-          <h3 className="font-medium text-white">Create New Post</h3>
+        <form onSubmit={handleCreatePost} className="mx-4 mt-4 p-4 bg-gray-50 rounded-xl space-y-3">
+          <h3 className="font-semibold">Start a Discussion</h3>
           <input
             type="text"
-            placeholder="Post title"
+            placeholder="What's on your mind?"
             value={newPost.title}
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7]"
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#A855F7]"
             required
           />
           <textarea
-            placeholder="What's on your mind?"
+            placeholder="Share more details..."
             value={newPost.content}
             onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#A855F7] resize-none"
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#A855F7] resize-none"
             rows={4}
             required
           />
           <select
             value={newPost.category}
             onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-            className="w-full px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-white focus:outline-none focus:border-[#A855F7]"
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#A855F7]"
           >
-            {categories.filter(c => c !== 'all').map(cat => (
-              <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+            {FORUM_SECTIONS.map(section => (
+              <option key={section.id} value={section.id}>{section.icon} {section.label}</option>
             ))}
           </select>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setShowNewPost(false)}
-              className="flex-1 py-2 bg-[#333] text-white rounded-lg"
+              className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg font-medium"
+              className="flex-1 py-2 bg-[#A855F7] text-white rounded-lg font-medium"
             >
               {submitting ? 'Posting...' : 'Post'}
             </button>
@@ -180,67 +216,83 @@ export default function ForumPage() {
         </form>
       )}
 
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setCategory(cat)}
-            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
-              category === cat
-                ? 'bg-[#A855F7] text-white'
-                : 'bg-[#242424] text-[#A0A0A0] hover:text-white'
-            }`}
-          >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </button>
-        ))}
-      </div>
-
       {loading ? (
-        <div className="text-center py-12 text-[#666]">Loading posts...</div>
-      ) : filteredPosts.length > 0 ? (
-        <div className="space-y-3">
-          {filteredPosts.map(post => (
-            <Link
-              key={post.id}
-              href={`/forum/${post.id}`}
-              className="block bg-[#242424] rounded-xl p-4 hover:bg-[#2a2a2a] transition-colors"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#A855F7]/20 text-[#A855F7]">
-                    {post.category}
-                  </span>
-                  <h3 className="font-medium text-white mt-2">{post.title}</h3>
-                  <p className="text-sm text-[#666] mt-1 line-clamp-2">{post.content}</p>
-                </div>
-                <FiArrowRight className="text-[#666] mt-2" />
-              </div>
-              <div className="flex items-center gap-4 mt-3 text-xs text-[#666]">
-                <span className="flex items-center gap-1">
-                  <FiUser size={12} />
-                  {post.authorName}
-                </span>
-                <span>{formatDate(post.createdAt)}</span>
-                <span className="flex items-center gap-1">
-                  <FiThumbsUp size={12} />
-                  {post.likes || 0}
-                </span>
-                <span className="flex items-center gap-1">
-                  <FiMessageSquare size={12} />
-                  {post.commentCount || 0}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <div className="text-center py-12 text-gray-400">Loading discussions...</div>
       ) : (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#242424] flex items-center justify-center">
-            <FiMessageSquare size={24} className="text-[#666]" />
+        <div className="p-4 space-y-3">
+          {pinnedPosts.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                <FiStar size={14} /> Pinned
+              </div>
+              {pinnedPosts.map(post => (
+                <Link
+                  key={post.id}
+                  href={`/forum/${post.id}`}
+                  className="block p-4 bg-amber-50 rounded-xl border border-amber-100 mb-2"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-200 text-amber-800">
+                        {getSectionInfo(post.category).icon} {getSectionInfo(post.category).label}
+                      </span>
+                      <h3 className="font-semibold text-gray-900 mt-2">{post.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{post.content}</p>
+                    </div>
+                    <FiArrowRight className="text-gray-400 mt-2" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <span>Latest Discussions</span>
+            <span>{filteredPosts.length} posts</span>
           </div>
-          <h3 className="text-lg font-medium text-white mb-2">No posts yet</h3>
-          <p className="text-[#666] text-sm">Be the first to start a discussion!</p>
+
+          {regularPosts.length > 0 ? (
+            regularPosts.map(post => (
+              <Link
+                key={post.id}
+                href={`/forum/${post.id}`}
+                className="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#A855F7] to-[#6366F1] flex items-center justify-center text-white text-sm">
+                    {post.authorAvatar || '👤'}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">
+                        {getSectionInfo(post.category).icon}
+                      </span>
+                      <span className="text-xs text-gray-400">{formatDate(post.createdAt)}</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mt-1">{post.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{post.content}</p>
+                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <FiThumbsUp size={14} />
+                        {post.likes || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FiMessageSquare size={14} />
+                        {post.commentCount || 0}
+                      </span>
+                      <span>{post.authorName}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-5xl mb-4">💬</div>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">No discussions yet</h3>
+              <p className="text-gray-500 text-sm">Be the first to start a conversation!</p>
+            </div>
+          )}
         </div>
       )}
     </div>
