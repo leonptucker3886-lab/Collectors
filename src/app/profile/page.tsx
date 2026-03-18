@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useApp } from '../../context/AppContext';
 import { Button, Select } from '../../components/ui';
 import storage from '../../lib/storage';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FiDownload, FiUpload, FiSettings, FiUser, FiFileText, FiTrash2 } from 'react-icons/fi';
+import { FiDownload, FiUpload, FiSettings, FiUser, FiFileText, FiTrash2, FiHelpCircle } from 'react-icons/fi';
 
 export default function ProfilePage() {
   const { state, updateSettings, getDashboardStats } = useApp();
@@ -250,6 +251,16 @@ export default function ProfilePage() {
             />
           </label>
         </div>
+      <Link
+          href="/help"
+          className="w-full p-4 bg-[#242424] rounded-xl flex items-center justify-between hover:bg-[#2a2a2a]"
+        >
+          <div className="flex items-center gap-3">
+            <FiHelpCircle size={20} className="text-[#4ECDC4]" />
+            <span className="text-white">Help Center</span>
+          </div>
+          <span className="text-[#666]">→</span>
+        </Link>
       </div>
 
       <div className="text-center text-xs text-[#666] py-4">

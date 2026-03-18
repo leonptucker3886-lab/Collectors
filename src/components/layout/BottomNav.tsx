@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiFolder, FiHeart, FiUser, FiTag, FiMessageSquare, FiPlus } from 'react-icons/fi';
+import { FiHome, FiFolder, FiHeart, FiUser, FiTag, FiMessageSquare, FiPlus, FiHelpCircle } from 'react-icons/fi';
+import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
   { href: '/', icon: FiHome, label: 'Home' },
@@ -13,6 +14,7 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-[#333] z-50 md:hidden">
@@ -65,6 +67,18 @@ export default function BottomNav() {
         >
           <FiTag size={22} />
           <span className="text-[10px] mt-1 font-medium">Market</span>
+        </Link>
+
+        <Link
+          href={user ? '/profile' : '/login'}
+          className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
+            pathname.startsWith('/profile') || pathname.startsWith('/login')
+              ? 'text-[#FF6B35] bg-[#FF6B35]/10'
+              : 'text-[#666] hover:text-[#A0A0A0]'
+          }`}
+        >
+          <FiUser size={22} />
+          <span className="text-[10px] mt-1 font-medium">{user ? 'Profile' : 'Login'}</span>
         </Link>
       </div>
     </nav>
