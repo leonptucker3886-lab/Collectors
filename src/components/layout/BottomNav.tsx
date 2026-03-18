@@ -3,82 +3,69 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiFolder, FiHeart, FiUser, FiTag, FiMessageSquare, FiPlus, FiHelpCircle } from 'react-icons/fi';
+import { FiHome, FiFolder, FiUser, FiPlus, FiMessageSquare, FiTag, FiFileText, FiDollarSign } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
-
-const navItems = [
-  { href: '/', icon: FiHome, label: 'Home' },
-  { href: '/collections', icon: FiFolder, label: 'Collections' },
-  { href: '/wishlist', icon: FiHeart, label: 'Wishlist' },
-];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-[#333] z-50 md:hidden">
-      <div className="flex items-center justify-between h-16 px-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || 
-            (item.href !== '/' && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
-                isActive
-                  ? 'text-[#A855F7] bg-[#A855F7]/10'
-                  : 'text-[#666] hover:text-[#A0A0A0]'
-              }`}
-            >
-              <item.icon size={22} />
-              <span className="text-[10px] mt-1 font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-        
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A] border-t border-[#1F1F1F] z-50 md:hidden">
+      <div className="flex items-center justify-between h-14 px-1">
+        <Link
+          href="/"
+          className={`flex flex-col items-center justify-center flex-1 py-1 ${
+            pathname === '/'
+              ? 'text-[#C0A080]'
+              : 'text-[#666]'
+          }`}
+        >
+          <FiHome size={20} />
+          <span className="text-[9px] mt-0.5">Dashboard</span>
+        </Link>
+
+        <Link
+          href="/collections"
+          className={`flex flex-col items-center justify-center flex-1 py-1 ${
+            pathname.startsWith('/collections')
+              ? 'text-[#C0A080]'
+              : 'text-[#666]'
+          }`}
+        >
+          <FiFolder size={20} />
+          <span className="text-[9px] mt-0.5">Vault</span>
+        </Link>
+
         <Link
           href="/marketplace/sell"
-          className="flex flex-col items-center justify-center w-12 h-12 -mt-4 bg-gradient-to-r from-[#A855F7] to-[#6366F1] rounded-full shadow-lg hover:scale-105 transition-transform"
+          className="flex flex-col items-center justify-center w-10 h-10 -mt-3 bg-[#C0A080] rounded-full"
         >
-          <FiPlus size={24} className="text-white" />
+          <FiPlus size={20} className="text-black" />
         </Link>
 
         <Link
           href="/forum"
-          className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center flex-1 py-1 ${
             pathname.startsWith('/forum')
-              ? 'text-[#A855F7] bg-[#A855F7]/10'
-              : 'text-[#666] hover:text-[#A0A0A0]'
+              ? 'text-[#C0A080]'
+              : 'text-[#666]'
           }`}
         >
-          <FiMessageSquare size={22} />
-          <span className="text-[10px] mt-1 font-medium">Forum</span>
+          <FiMessageSquare size={20} />
+          <span className="text-[9px] mt-0.5">Forum</span>
         </Link>
 
         <Link
-          href="/marketplace"
-          className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
-            pathname.startsWith('/marketplace')
-              ? 'text-[#A855F7] bg-[#A855F7]/10'
-              : 'text-[#666] hover:text-[#A0A0A0]'
+          href="/profile"
+          className={`flex flex-col items-center justify-center flex-1 py-1 ${
+            pathname.startsWith('/profile')
+              ? 'text-[#C0A080]'
+              : 'text-[#666]'
           }`}
         >
-          <FiTag size={22} />
-          <span className="text-[10px] mt-1 font-medium">Market</span>
-        </Link>
-
-        <Link
-          href={user ? '/profile' : '/login'}
-          className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all ${
-            pathname.startsWith('/profile') || pathname.startsWith('/login')
-              ? 'text-[#A855F7] bg-[#A855F7]/10'
-              : 'text-[#666] hover:text-[#A0A0A0]'
-          }`}
-        >
-          <FiUser size={22} />
-          <span className="text-[10px] mt-1 font-medium">{user ? 'Profile' : 'Login'}</span>
+          <FiUser size={20} />
+          <span className="text-[9px] mt-0.5">Profile</span>
         </Link>
       </div>
     </nav>

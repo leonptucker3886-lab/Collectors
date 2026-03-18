@@ -3,127 +3,129 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp } from '../context/AppContext';
-import { HeroCard, StatCard } from '../components/ui';
-import CollectionCard from '../components/collection/CollectionCard';
-import ItemCard from '../components/item/ItemCard';
-import { FiPlus, FiBox, FiFolder, FiArrowRight } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import { FiPlus, FiFolder, FiBox, FiShield, FiFileText, FiHeart, FiCreditCard, FiTrendingUp } from 'react-icons/fi';
 
 export default function Dashboard() {
-  const { state, getDashboardStats, getItemsByCollection } = useApp();
+  const { state, getDashboardStats } = useApp();
+  const { profile } = useAuth();
   const stats = getDashboardStats();
+  const needsSubscription = state.collections.length >= 2;
 
   return (
-    <div className="space-y-6">
-      <HeroCard className="text-white">
-        <p className="text-white/80 text-sm">Total Portfolio Value</p>
-        <p className="text-4xl font-bold mt-1" style={{ fontFamily: 'var(--font-jetbrains)' }}>
-          ${stats.totalValue.toLocaleString()}
-        </p>
-        <div className="flex items-center gap-4 mt-3">
-          <span className="text-sm bg-white/20 px-3 py-1 rounded-full">
-            {stats.totalItems} items
-          </span>
-          <span className="text-sm bg-white/20 px-3 py-1 rounded-full">
-            {stats.totalCollections} collections
-          </span>
+    <div className="space-y-6 pb-20">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-light tracking-wide">Dashboard</h1>
+          <p className="text-[#666] text-sm">{profile?.displayName || 'Collector'}</p>
         </div>
-      </HeroCard>
-
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard
-          label="Collections"
-          value={stats.totalCollections}
-          icon={<FiFolder size={20} />}
-        />
-        <StatCard
-          label="Items"
-          value={stats.totalItems}
-          icon={<FiBox size={20} />}
-        />
       </div>
 
-      {stats.categoryBreakdown.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">By Category</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F]">
+          <FiFolder className="text-[#C0A080] mb-2" size={24} />
+          <p className="text-2xl font-light">{stats.totalCollections}</p>
+          <p className="text-xs text-[#666]">Collections</p>
+        </div>
+        <div className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F]">
+          <FiBox className="text-[#C0A080] mb-2" size={24} />
+          <p className="text-2xl font-light">{stats.totalItems}</p>
+          <p className="text-xs text-[#666]">Items</p>
+        </div>
+        <div className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] col-span-2">
+          <FiTrendingUp className="text-[#C0A080] mb-2" size={24} />
+          <p className="text-3xl font-light text-[#C0A080]">${stats.totalValue.toLocaleString()}</p>
+          <p className="text-xs text-[#666]">Total Value</p>
+        </div>
+      </div>
+
+      {needsSubscription && (
+        <div className="bg-[#C0A080]/10 border border-[#C0A080]/30 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <FiCreditCard className="text-[#C0A080]" size={24} />
+            <div>
+              <h3 className="font-medium text-[#C0A080]">Subscription Required</h3>
+              <p className="text-sm text-[#666]">You have {state.collections.length} collections. Upgrade to continue adding more.</p>
+            </div>
           </div>
+          <button className="mt-3 w-full py-2 bg-[#C0A080] text-black rounded-lg font-medium">
+            Subscribe - $9.99/mo
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/collections" className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] hover:border-[#C0A080] transition-colors">
+          <FiFolder className="text-[#C0A080] mb-2" size={24} />
+          <p className="font-medium">My Vault</p>
+          <p className="text-xs text-[#666]">{state.collections.length} collections</p>
+        </Link>
+        
+        <Link href="/collections" className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] hover:border-[#C0A080] transition-colors">
+          <FiBox className="text-[#C0A080] mb-2" size={24} />
+          <p className="font-medium">All Items</p>
+          <p className="text-xs text-[#666]">{state.items.length} items</p>
+        </Link>
+
+        <Link href="/collections" className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] hover:border-[#C0A080] transition-colors">
+          <FiShield className="text-[#C0A080] mb-2" size={24} />
+          <p className="font-medium">Insurance</p>
+          <p className="text-xs text-[#666]">View coverage</p>
+        </Link>
+
+        <Link href="/collections" className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] hover:border-[#C0A080] transition-colors">
+          <FiFileText className="text-[#C0A080] mb-2" size={24} />
+          <p className="font-medium">Notes</p>
+          <p className="text-xs text-[#666]">Documentation</p>
+        </Link>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-light">Recent Items</h2>
+          <Link href="/collections" className="text-sm text-[#C0A080]">View All</Link>
+        </div>
+        
+        {state.items.length > 0 ? (
           <div className="space-y-2">
-            {stats.categoryBreakdown.map((cat) => (
-              <div key={cat.category} className="flex items-center justify-between bg-[#242424] rounded-lg p-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#A855F7]/20 flex items-center justify-center text-[#A855F7]">
-                    <FiFolder size={16} />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white text-sm">{cat.category}</p>
-                    <p className="text-xs text-[#666]">{cat.count} items</p>
-                  </div>
+            {state.items.slice(0, 5).map((item) => (
+              <Link 
+                key={item.id} 
+                href={`/item/${item.id}`}
+                className="flex items-center gap-3 bg-[#141414] rounded-lg p-3 border border-[#1F1F1F]"
+              >
+                <div className="w-12 h-12 bg-[#1F1F1F] rounded-lg flex items-center justify-center text-xl">
+                  {item.images?.[0] ? (
+                    <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    '□'
+                  )}
                 </div>
-                <p className="font-semibold text-[#FFE66D]" style={{ fontFamily: 'var(--font-jetbrains)' }}>
-                  ${cat.value.toLocaleString()}
-                </p>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{item.name}</p>
+                  <p className="text-xs text-[#666]">{item.condition}</p>
+                </div>
+                <p className="text-[#C0A080]">${item.currentValue?.toLocaleString() || '0'}</p>
+              </Link>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8 bg-[#141414] rounded-xl border border-[#1F1F1F]">
+            <p className="text-[#666]">No items yet</p>
+            <Link href="/collections" className="text-sm text-[#C0A080] mt-2 inline-block">Add your first item →</Link>
+          </div>
+        )}
+      </div>
 
-      {stats.recentItems.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Recently Added</h2>
-            <Link href="/collections" className="text-sm text-[#A855F7] flex items-center gap-1">
-              View all <FiArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {stats.recentItems.slice(0, 4).map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onClick={() => {}}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {state.collections.length > 0 ? (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Your Collections</h2>
-            <Link href="/collections" className="text-sm text-[#A855F7] flex items-center gap-1">
-              View all <FiArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {state.collections.slice(0, 4).map((collection) => (
-              <CollectionCard
-                key={collection.id}
-                collection={collection}
-                itemCount={getItemsByCollection(collection.id).length}
-                totalValue={getItemsByCollection(collection.id).reduce((sum, i) => sum + (i.currentValue || 0), 0)}
-                onClick={() => {}}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#242424] flex items-center justify-center">
-            <FiPlus size={24} className="text-[#666]" />
-          </div>
-          <h3 className="text-lg font-medium text-white mb-2">No collections yet</h3>
-          <p className="text-[#666] text-sm mb-4">Start by creating your first collection</p>
-          <Link
-            href="/collections/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A855F7] to-[#6366F1] text-white rounded-lg font-medium"
-          >
-            <FiPlus size={18} />
-            Create Collection
-          </Link>
-        </div>
-      )}
+      <div className="text-center pt-4">
+        <Link 
+          href="/collections/new" 
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#C0A080] text-black rounded-full font-medium"
+        >
+          <FiPlus size={20} />
+          New Collection
+        </Link>
+      </div>
     </div>
   );
 }

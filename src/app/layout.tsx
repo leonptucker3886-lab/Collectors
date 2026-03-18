@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppProvider } from "../context/AppContext";
 import { AuthProvider } from "../context/AuthContext";
 import BottomNav from "../components/layout/BottomNav";
+import AuthGuard from "../components/AuthGuard";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -16,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CollectVault - Your Treasure Awaits",
-  description: "Track, trade, and treasure your collectibles. The ultimate collector's companion!",
+  title: "CollectVault - Premium Collectors Network",
+  description: "The premier platform for serious collectors",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
@@ -28,11 +29,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.variable} ${jetbrainsMono.variable} font-sans`}>
+      <body className={`${outfit.variable} ${jetbrainsMono.variable} font-sans bg-[#0A0A0A] text-white`}>
         <AuthProvider>
           <AppProvider>
-            {children}
-            <BottomNav />
+            <AuthGuard>
+              {children}
+              <BottomNav />
+            </AuthGuard>
           </AppProvider>
         </AuthProvider>
       </body>
