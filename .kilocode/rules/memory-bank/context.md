@@ -1,87 +1,67 @@
-# Active Context: Next.js Starter Template
+# Active Context: CollectVault - Collector Portfolio App
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**App Status**: MVP Complete - Build Ready
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+CollectVault is a mobile-first collector portfolio manager built with Next.js 16, TypeScript, and Tailwind CSS. It features a dark theme with orange accents, offline-first architecture using localForage, and PWA-ready structure.
 
 ## Recently Completed
 
-- [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
+- [x] Project setup with Next.js 16 App Router
+- [x] Type definitions for collections, items, wishlists, trade listings
+- [x] Collection templates (Trading Cards, Vinyl, Coins, Funko Pops, Books, Video Games, Stamps, Jewelry)
+- [x] Custom fields per collection type
+- [x] Image upload with compression
+- [x] Value tracking with purchase/current values
+- [x] Dashboard with portfolio overview
+- [x] Collection management (create, view, delete)
+- [x] Item management (add, edit, delete with photos)
+- [x] Wishlist functionality
+- [x] Export to PDF/CSV/JSON
+- [x] Import/backup functionality
+- [x] Dark theme UI with mobile-first design
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
-| `.kilocode/` | AI context & recipes | ✅ Ready |
+| `src/app/page.tsx` | Dashboard | ✅ |
+| `src/app/collections/` | Collections list & create | ✅ |
+| `src/app/collections/[id]/` | Collection detail | ✅ |
+| `src/app/add/` | Add new item | ✅ |
+| `src/app/item/[id]/` | Item detail & edit | ✅ |
+| `src/app/wishlist/` | Wishlist | ✅ |
+| `src/app/profile/` | Settings & export | ✅ |
+| `src/context/AppContext.tsx` | State management | ✅ |
+| `src/lib/storage.ts` | LocalForage persistence | ✅ |
+| `src/data/templates.ts` | Collection templates | ✅ |
+| `src/components/ui/` | Button, Input, Card, Modal | ✅ |
+| `src/components/collection/` | CollectionCard | ✅ |
+| `src/components/item/` | ItemCard | ✅ |
 
 ## Current Focus
 
-The template is ready. Next steps depend on user requirements:
+The MVP is complete. Next steps for enhancement:
 
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+1. Cloud sync (Firebase/Supabase)
+2. Trade/Sell marketplace (local listings)
+3. AI auto-tagging integration
+4. Dark mode shelf view gallery
+5. Family sharing / estate mode
 
-## Quick Start Guide
+## Build Commands
 
-### To add a new page:
-
-Create a file at `src/app/[route]/page.tsx`:
-```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
-```
-
-### To add components:
-
-Create `src/components/` directory and add components:
-```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
-```
-
-### To add a database:
-
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
-
-## Available Recipes
-
-| Recipe | File | Use Case |
-|--------|------|----------|
-| Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
-
-## Pending Improvements
-
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+| Command | Purpose |
+|---------|---------|
+| `bun install` | Install dependencies |
+| `bun build` | Build production app |
+| `bun lint` | Check code quality |
+| `bun typecheck` | Type checking |
+| `bun dev` | Development server |
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
-| Initial | Template created with base setup |
+| Initial | Built CollectVault MVP - collector portfolio app with collections, items, photos, value tracking, wishlist, PDF/CSV export |
