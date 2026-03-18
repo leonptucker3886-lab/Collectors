@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { FiSearch, FiHeart, FiClock, FiChevronRight, FiLoader } from 'react-icons/fi';
+import { collection, query, getDocs, orderBy, limit, where, startAfter, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 interface Listing {
   id: string;
@@ -21,10 +23,10 @@ interface Listing {
   likedBy?: string[];
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 12;
 
 export default function MarketplacePage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -39,9 +41,6 @@ export default function MarketplacePage() {
     if (loadMore && (!lastDoc || loadingMore)) return;
     
     try {
-      const { db } = await import('../../lib/firebase');
-      const { collection, query, getDocs, orderBy, limit, where, startAfter } = await import('firebase/firestore');
-      
       let q;
       
       if (category === 'all') {
@@ -69,9 +68,9 @@ export default function MarketplacePage() {
         return;
       }
 
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      const data = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
       })) as Listing[];
       
       setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
@@ -106,21 +105,33 @@ export default function MarketplacePage() {
     fetchListings(true);
   };
 
-  const handleLike = async (listingId: string) => {
+  const handleLike = async (listingId: string, currentLikes: string[] = []) => {
     if (!user) return;
     
-    setLikedItems(prev => 
-      prev.includes(listingId) 
-        ? prev.filter(id => id !== listingId)
-        : [...prev, listingId]
-    );
+    const isLiked = likedItems.includes(listingId);
+    const newLikedItems = isLiked 
+      ? likedItems.filter(id => id !== listingId)
+      : [...likedItems, listingId];
+    
+    setLikedItems(newLikedItems);
+
+    try {
+      const listingRef = doc(db, 'listings', listingId);
+      await updateDoc(listingRef, {
+        likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid),
+        likes: (currentLikes.length || 0) + (isLiked ? -1 : 1)
+      });
+    } catch (error) {
+      console.error('Error updating like:', error);
+    }
   };
 
   const filteredListings = listings
     .filter(listing => {
-      const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        listing.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
+      if (!searchQuery) return true;
+      const search = searchQuery.toLowerCase();
+      return listing.title.toLowerCase().includes(search) ||
+        (listing.description || '').toLowerCase().includes(search);
     })
     .sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price;
@@ -143,7 +154,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
       <header className="sticky top-0 bg-[#0A0A0A] border-b border-[#1F1F1F] z-40">
         <div className="flex items-center justify-between px-4 py-3">
           <Link href="/profile" className="flex items-center gap-2">
@@ -155,7 +165,6 @@ export default function MarketplacePage() {
           <div className="w-8" />
         </div>
 
-        {/* Search */}
         <div className="px-4 pb-3">
           <div className="relative">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666]" size={18} />
@@ -169,7 +178,6 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        {/* Categories */}
         <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide">
           {categories.map(cat => (
             <button
@@ -187,7 +195,6 @@ export default function MarketplacePage() {
         </div>
       </header>
 
-      {/* Sort */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-[#1F1F1F]">
         <span className="text-xs text-[#666]">{filteredListings.length} items</span>
         <button 
@@ -199,7 +206,6 @@ export default function MarketplacePage() {
         </button>
       </div>
 
-      {/* Listings Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-6 h-6 border-2 border-[#C0A080] border-t-transparent rounded-full animate-spin" />
@@ -219,13 +225,17 @@ export default function MarketplacePage() {
                       src={listing.images[0]} 
                       alt={listing.title} 
                       className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl text-[#2A2A2A]">📦</div>
                   )}
                   
                   <button
-                    onClick={(e) => { e.preventDefault(); handleLike(listing.id); }}
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      handleLike(listing.id, listing.likedBy || []); 
+                    }}
                     className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110"
                   >
                     <FiHeart 

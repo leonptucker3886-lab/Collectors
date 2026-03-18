@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiMessageSquare, FiPlus, FiThumbsUp, FiUsers, FiClock, FiTrendingUp } from 'react-icons/fi';
-import { doc, onSnapshot, setDoc, serverTimestamp, collection, query, orderBy, getDocs, limit, where, addDoc } from 'firebase/firestore';
+import { FiMessageSquare, FiPlus, FiThumbsUp, FiUsers, FiClock } from 'react-icons/fi';
+import { collection, query, orderBy, getDocs, limit, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 interface Post {
@@ -17,13 +17,6 @@ interface Post {
   likes: number;
   createdAt: any;
   commentCount: number;
-  isPinned?: boolean;
-}
-
-interface OnlineUser {
-  uid: string;
-  displayName: string;
-  lastActive: any;
 }
 
 const FORUM_SECTIONS = [
@@ -34,93 +27,66 @@ const FORUM_SECTIONS = [
   { id: 'news', label: 'News' },
 ];
 
-const POSTS_PER_PAGE = 15;
+const POSTS_PER_PAGE = 10;
 
 export default function ForumPage() {
   const { user, profile, updateProfile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'general' });
   const [submitting, setSubmitting] = useState(false);
-  const [totalPosts, setTotalPosts] = useState(0);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    let mounted = true;
+    
+    const fetchPosts = async () => {
       try {
         const postsRef = collection(db, 'forum_posts');
-        const postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(POSTS_PER_PAGE));
+        const postsQuery = query(
+          postsRef, 
+          orderBy('createdAt', 'desc'), 
+          limit(POSTS_PER_PAGE)
+        );
         const snapshot = await getDocs(postsQuery);
+        
+        if (!mounted) return;
         
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Post[];
         setPosts(data);
-
-        const countQuery = query(collection(db, 'forum_posts'));
-        const countSnapshot = await getDocs(countQuery);
-        setTotalPosts(countSnapshot.size);
       } catch (error) {
         console.error('Error fetching posts:', error);
-        setPosts([]);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    fetchInitialData();
+    fetchPosts();
+
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
     if (!user) return;
 
-    const userStatusRef = doc(db, 'presence', user.uid);
-    
-    const setupPresence = async () => {
-      await setDoc(userStatusRef, {
-        uid: user.uid,
-        displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        lastActive: serverTimestamp(),
-        online: true,
-      }, { merge: true });
-
-      const timeout = setTimeout(async () => {
-        await setDoc(userStatusRef, {
+    const updatePresence = async () => {
+      try {
+        await setDoc(doc(db, 'presence', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
           lastActive: serverTimestamp(),
-          online: false,
+          online: true,
         }, { merge: true });
-      }, 5 * 60 * 1000);
-
-      return () => clearTimeout(timeout);
+      } catch (e) {
+        console.log('Presence update skipped');
+      }
     };
 
-    setupPresence();
-
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'presence'), where('online', '==', true), limit(20)),
-      (snapshot) => {
-        const users = snapshot.docs.map(doc => doc.data() as OnlineUser);
-        setOnlineUsers(users);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [user]);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!user) return;
-      
-      await setDoc(doc(db, 'presence', user.uid), {
-        lastActive: serverTimestamp(),
-        online: true,
-      }, { merge: true });
-    }, 60000);
-
-    return () => clearInterval(interval);
+    updatePresence();
   }, [user]);
 
   const handleCreatePost = async (e: React.FormEvent) => {
@@ -144,17 +110,20 @@ export default function ForumPage() {
         await updateProfile({ postCount: (profile.postCount || 0) + 1 });
       }
       
-      setNewPost({ title: '', content: '', category: 'general' });
-      setShowNewPost(false);
-      
-      const postsQuery = query(collection(db, 'forum_posts'), orderBy('createdAt', 'desc'), limit(POSTS_PER_PAGE));
+      const postsQuery = query(
+        collection(db, 'forum_posts'), 
+        orderBy('createdAt', 'desc'), 
+        limit(POSTS_PER_PAGE)
+      );
       const snapshot = await getDocs(postsQuery);
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Post[];
       setPosts(data);
-      setTotalPosts(prev => prev + 1);
+      
+      setNewPost({ title: '', content: '', category: 'general' });
+      setShowNewPost(false);
     } catch (error) {
       console.error('Error creating post:', error);
     } finally {
@@ -162,9 +131,9 @@ export default function ForumPage() {
     }
   };
 
-  const filteredPosts = posts.filter(post => 
-    category === 'all' || post.category === category
-  );
+  const filteredPosts = category === 'all' 
+    ? posts 
+    : posts.filter(post => post.category === category);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
@@ -185,7 +154,7 @@ export default function ForumPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-xl font-semibold">Community</h1>
-            <p className="text-xs text-[#666]">{totalPosts} discussions</p>
+            <p className="text-xs text-[#666]">{posts.length} recent posts</p>
           </div>
           {user && (
             <button
@@ -197,32 +166,6 @@ export default function ForumPage() {
             </button>
           )}
         </div>
-
-        {onlineUsers.length > 0 && (
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-1 text-xs text-[#C0A080]">
-              <span className="w-2 h-2 bg-[#C0A080] rounded-full animate-pulse" />
-              <FiUsers size={12} />
-              {onlineUsers.length} online
-            </div>
-            <div className="flex -space-x-2">
-              {onlineUsers.slice(0, 5).map((u, i) => (
-                <div 
-                  key={i} 
-                  className="w-6 h-6 rounded-full bg-[#1F1F1F] border-2 border-[#0A0A0A] flex items-center justify-center text-[10px]"
-                  title={u.displayName}
-                >
-                  {u.displayName?.[0]?.toUpperCase() || '?'}
-                </div>
-              ))}
-              {onlineUsers.length > 5 && (
-                <div className="w-6 h-6 rounded-full bg-[#2A2A2A] border-2 border-[#0A0A0A] flex items-center justify-center text-[10px]">
-                  +{onlineUsers.length - 5}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
         
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button
@@ -321,11 +264,11 @@ export default function ForumPage() {
                     <h3 className="font-medium text-white text-sm leading-tight">{post.title}</h3>
                     <p className="text-xs text-[#666] mt-1.5 line-clamp-2">{post.content}</p>
                     <div className="flex items-center gap-4 mt-3 text-xs text-[#666]">
-                      <span className="flex items-center gap-1 hover:text-[#C0A080]">
+                      <span className="flex items-center gap-1">
                         <FiThumbsUp size={12} />
                         {post.likes || 0}
                       </span>
-                      <span className="flex items-center gap-1 hover:text-[#C0A080]">
+                      <span className="flex items-center gap-1">
                         <FiMessageSquare size={12} />
                         {post.commentCount || 0}
                       </span>
