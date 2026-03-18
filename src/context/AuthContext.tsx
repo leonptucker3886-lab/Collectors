@@ -27,36 +27,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isConfigured, setIsConfigured] = useState(false);
 
   useEffect(() => {
-    // Check if Firebase is configured
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    if (apiKey && apiKey !== 'demo-api-key') {
-      setIsConfigured(true);
-      
-      // Dynamic import Firebase to avoid build errors
-      import('../lib/firebase').then(({ auth, db }) => {
-        import('firebase/auth').then(({ onAuthStateChanged }) => {
-          const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: unknown) => {
-            if (firebaseUser && typeof firebaseUser === 'object' && 'uid' in firebaseUser) {
-              const fu = firebaseUser as { uid: string; email: string | null; displayName: string | null; photoURL: string | null };
-              setUser({
-                uid: fu.uid,
-                email: fu.email,
-                displayName: fu.displayName,
-                photoURL: fu.photoURL,
-              });
-            } else {
-              setUser(null);
-            }
-            setLoading(false);
-          });
-          return () => unsubscribe();
+    // Firebase is configured with hardcoded fallback values
+    setIsConfigured(true);
+    
+    // Dynamic import Firebase
+    import('../lib/firebase').then(({ auth, db }) => {
+      import('firebase/auth').then(({ onAuthStateChanged }) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: unknown) => {
+          if (firebaseUser && typeof firebaseUser === 'object' && 'uid' in firebaseUser) {
+            const fu = firebaseUser as { uid: string; email: string | null; displayName: string | null; photoURL: string | null };
+            setUser({
+              uid: fu.uid,
+              email: fu.email,
+              displayName: fu.displayName,
+              photoURL: fu.photoURL,
+            });
+          } else {
+            setUser(null);
+          }
+          setLoading(false);
         });
-      }).catch(() => {
-        setLoading(false);
+        return () => unsubscribe();
       });
-    } else {
+    }).catch(() => {
       setLoading(false);
-    }
+    });
   }, []);
 
   const signIn = async (email: string, password: string) => {
