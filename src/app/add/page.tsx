@@ -13,7 +13,6 @@ function AddItemContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { state, createItem } = useApp();
-  const { addPoints, earnBadge, profile } = useAuth();
   
   const collectionId = searchParams.get('collection');
   const collection = state.collections.find((c) => c.id === collectionId);
@@ -64,17 +63,6 @@ function AddItemContent() {
         isForSale: formData.isForSale,
         askingPrice: formData.askingPrice ? parseFloat(formData.askingPrice) : undefined,
       });
-      
-      await addPoints(5);
-      
-      if (profile) {
-        const currentItems = profile.stats?.itemsCollected || 0;
-        if (currentItems === 0) {
-          await earnBadge('first_item');
-        } else if (currentItems >= 9) {
-          await earnBadge('ten_items');
-        }
-      }
       
       router.push(`/collections/${collectionId}`);
     } catch (error) {

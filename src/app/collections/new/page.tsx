@@ -11,7 +11,6 @@ import { FiArrowLeft } from 'react-icons/fi';
 export default function NewCollectionPage() {
   const router = useRouter();
   const { createCollection } = useApp();
-  const { addPoints, earnBadge, profile } = useAuth();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,16 +22,6 @@ export default function NewCollectionPage() {
     setLoading(true);
     try {
       const collection = await createCollection(name, selectedTemplate, description);
-      
-      await addPoints(10);
-      
-      if (profile) {
-        const currentCollections = profile.stats?.collectionsCreated || 0;
-        if (currentCollections === 0) {
-          await earnBadge('first_collection');
-        }
-      }
-      
       router.push(`/collections/${collection.id}`);
     } catch (error) {
       console.error(error);

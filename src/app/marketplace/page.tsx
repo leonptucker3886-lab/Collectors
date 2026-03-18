@@ -24,7 +24,7 @@ interface Listing {
 
 export default function MarketplacePage() {
   const router = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -36,11 +36,10 @@ export default function MarketplacePage() {
     const fetchListings = async () => {
       try {
         const { db } = await import('../../lib/firebase');
-        const { collection, query, where, getDocs, orderBy } = await import('firebase/firestore');
+        const { collection, query, getDocs, orderBy } = await import('firebase/firestore');
         
         const q = query(
           collection(db, 'listings'),
-          where('status', '==', 'active'),
           orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
@@ -48,20 +47,17 @@ export default function MarketplacePage() {
           id: doc.id,
           ...doc.data()
         })) as Listing[];
-        setListings(data);
+        setListings(data.filter(l => l.status === 'active'));
       } catch (error) {
         console.error('Error fetching listings:', error);
+        setListings([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (user) {
-      fetchListings();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+    fetchListings();
+  }, []);
 
   const filteredListings = listings
     .filter(listing => {
@@ -87,25 +83,10 @@ export default function MarketplacePage() {
     { id: 'other', label: 'Other', emoji: '📦' },
   ];
 
-  if (authLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-[#A855F7]">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🛒</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Sign in to buy & sell</h2>
-          <p className="text-gray-500 mb-6">Join thousands of collectors trading treasures</p>
-          <Link href="/login" className="px-8 py-3 bg-[#A855F7] text-white rounded-full font-medium">
-            Get Started
-          </Link>
-        </div>
       </div>
     );
   }

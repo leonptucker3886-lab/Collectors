@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { UserProfile, AVATARS, AVATAR_COLORS, BADGES } from '../types';
+import { UserProfile, AVATARS, AVATAR_COLORS } from '../types';
 
 interface AuthUser {
   uid: string;
@@ -24,8 +24,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  addPoints: (points: number) => Promise<void>;
-  earnBadge: (badgeId: string) => Promise<void>;
   isConfigured: boolean;
 }
 
@@ -42,21 +40,13 @@ const createDefaultProfile = (uid: string, email: string | null, displayName: st
     avatar: randomAvatar,
     avatarColor: randomColor,
     bio: '',
+    tagline: '',
     location: '',
     website: '',
     joinedAt: new Date().toISOString(),
-    points: 0,
-    level: 1,
-    badges: [],
-    stats: {
-      itemsCollected: 0,
-      collectionsCreated: 0,
-      forumPosts: 0,
-      marketplaceSales: 0,
-      tradesCompleted: 0,
-      likesReceived: 0,
-    },
-    theme: 'purple',
+    postCount: 0,
+    tradeCount: 0,
+    lastActive: new Date().toISOString(),
   };
 };
 
@@ -111,7 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     const result = await createUserWithEmailAndPassword(auth, email, password);
     const defaultProfile = createDefaultProfile(result.user.uid, email, name);
-    defaultProfile.points = 50;
     
     await setDoc(doc(db, 'users', result.user.uid), defaultProfile);
   };
@@ -142,33 +131,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(updatedProfile);
   };
 
-  const addPoints = async (points: number) => {
-    if (!user || !profile) return;
-    
-    const newPoints = profile.points + points;
-    const newLevel = Math.min(7, Math.floor(newPoints / 500) + 1);
-    
-    const updatedProfile = { ...profile, points: newPoints, level: newLevel };
-    await setDoc(doc(db, 'users', user.uid), updatedProfile, { merge: true });
-    setProfile(updatedProfile);
-  };
-
-  const earnBadge = async (badgeId: string) => {
-    if (!user || !profile) return;
-    
-    const badge = BADGES.find(b => b.id === badgeId);
-    if (!badge || profile.badges.some(b => b.id === badgeId)) return;
-    
-    const newBadge = { ...badge, earnedAt: new Date().toISOString() };
-    const updatedProfile = {
-      ...profile,
-      badges: [...profile.badges, newBadge],
-    };
-    
-    await setDoc(doc(db, 'users', user.uid), updatedProfile, { merge: true });
-    setProfile(updatedProfile);
-  };
-
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -180,8 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout, 
       resetPassword,
       updateProfile,
-      addPoints,
-      earnBadge,
       isConfigured 
     }}>
       {children}

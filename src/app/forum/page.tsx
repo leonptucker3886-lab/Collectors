@@ -29,7 +29,7 @@ const FORUM_SECTIONS = [
 ];
 
 export default function ForumPage() {
-  const { user, profile, addPoints, earnBadge } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -75,19 +75,14 @@ export default function ForumPage() {
         category: newPost.category,
         authorId: user.uid,
         authorName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        authorAvatar: profile?.avatar || '👤',
+        authorAvatar: profile?.avatar || '⚔️',
         likes: 0,
         createdAt: serverTimestamp(),
         commentCount: 0,
       });
       
-      await addPoints(2);
-      
       if (profile) {
-        const currentPosts = profile.stats?.forumPosts || 0;
-        if (currentPosts === 0) {
-          await earnBadge('forum_post');
-        }
+        await updateProfile({ postCount: (profile.postCount || 0) + 1 });
       }
       
       setNewPost({ title: '', content: '', category: 'general' });
