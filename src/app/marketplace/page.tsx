@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { FiSearch, FiPlus, FiFilter, FiHeart, FiMessageCircle } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiHeart } from 'react-icons/fi';
 
 interface Listing {
   id: string;
@@ -23,7 +22,6 @@ interface Listing {
 }
 
 export default function MarketplacePage() {
-  const router = useRouter();
   const { user, profile } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,13 +34,9 @@ export default function MarketplacePage() {
     const fetchListings = async () => {
       try {
         const { db } = await import('../../lib/firebase');
-        const { collection, query, getDocs, orderBy } = await import('firebase/firestore');
+        const { collection, query, getDocs, orderBy, getCountFromServer } = await import('firebase/firestore');
         
-        const q = query(
-          collection(db, 'listings'),
-          orderBy('createdAt', 'desc')
-        );
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(query(collection(db, 'listings'), orderBy('createdAt', 'desc')));
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -73,135 +67,93 @@ export default function MarketplacePage() {
     });
 
   const categories = [
-    { id: 'all', label: 'All', emoji: '✨' },
-    { id: 'cards', label: 'Cards', emoji: '🎴' },
-    { id: 'records', label: 'Records', emoji: '💿' },
-    { id: 'stamps', label: 'Stamps', emoji: '📮' },
-    { id: 'toys', label: 'Toys', emoji: '🧸' },
-    { id: 'sports', label: 'Sports', emoji: '⚽' },
-    { id: 'nft', label: 'NFT', emoji: '🔗' },
-    { id: 'other', label: 'Other', emoji: '📦' },
+    { id: 'all', label: 'All' },
+    { id: 'cards', label: 'Cards' },
+    { id: 'records', label: 'Records' },
+    { id: 'stamps', label: 'Stamps' },
+    { id: 'toys', label: 'Toys' },
+    { id: 'sports', label: 'Sports' },
+    { id: 'comics', label: 'Comics' },
+    { id: 'coins', label: 'Coins' },
+    { id: 'art', label: 'Art' },
+    { id: 'antiques', label: 'Antiques' },
+    { id: 'other', label: 'Other' },
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-[#A855F7]">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white text-gray-900 pb-24">
-      <div className="sticky top-0 bg-white z-30 border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold">Trade</h1>
-          <div className="flex items-center gap-2">
-            <Link href="/profile" className="w-8 h-8 rounded-full bg-gradient-to-r from-[#A855F7] to-[#6366F1] flex items-center justify-center text-white text-sm">
-              {profile?.avatar || '👤'}
-            </Link>
-          </div>
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[#1F1F1F] px-4 py-4 z-30">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-light tracking-wide">Marketplace</h1>
+          <Link href="/profile" className="w-9 h-9 rounded-full bg-[#1F1F1F] flex items-center justify-center text-lg">
+            {profile?.avatar || '👤'}
+          </Link>
         </div>
         
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search for treasures..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#A855F7]"
-            />
-          </div>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="p-2.5 bg-gray-100 rounded-full hover:bg-gray-200"
-          >
-            <FiFilter size={20} className="text-gray-600" />
-          </button>
+        <div className="relative mb-3">
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#666]" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-[#141414] border border-[#2A2A2A] rounded-lg text-white placeholder-[#666] focus:outline-none focus:border-[#C0A080]"
+          />
         </div>
 
-        {showFilters && (
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-1.5 bg-gray-100 rounded-full text-sm focus:outline-none"
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setCategory(cat.id)}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
+                category === cat.id
+                  ? 'bg-[#C0A080] text-black'
+                  : 'bg-[#1F1F1F] text-[#888] hover:text-white'
+              }`}
             >
-              <option value="newest">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
-        )}
-      </div>
-
-      <div className="flex gap-3 overflow-x-auto px-4 py-3 border-b border-gray-100">
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setCategory(cat.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
-              category === cat.id
-                ? 'bg-[#A855F7] text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <span>{cat.emoji}</span>
-            {cat.label}
-          </button>
-        ))}
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading treasures...</div>
+        <div className="text-center py-20 text-[#666]">Loading...</div>
       ) : filteredListings.length > 0 ? (
-        <div className="grid grid-cols-3 gap-1 p-1">
+        <div className="grid grid-cols-3 gap-0.5 p-0.5 bg-[#0A0A0A]">
           {filteredListings.map(listing => (
             <Link
               key={listing.id}
               href={`/marketplace/${listing.id}`}
-              className="bg-white"
+              className="bg-[#0A0A0A]"
             >
-              <div className="aspect-square bg-gray-100 relative">
+              <div className="aspect-square bg-[#141414]">
                 {listing.images?.[0] ? (
                   <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl">📦</div>
-                )}
-                {listing.likes > 0 && (
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-white/80 rounded-full text-xs flex items-center gap-1">
-                    <FiHeart size={10} className="text-red-500" /> {listing.likes}
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center text-3xl opacity-20">□</div>
                 )}
               </div>
-              <div className="p-2">
-                <p className="font-bold text-gray-900" style={{ fontFamily: 'var(--font-jetbrains)' }}>
-                  ${listing.price.toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-500 truncate mt-0.5">{listing.title}</p>
-                <p className="text-xs text-gray-400 mt-1">{listing.condition}</p>
+              <div className="p-2 bg-[#0A0A0A]">
+                <p className="text-sm font-medium text-white truncate">{listing.title}</p>
+                <p className="text-lg font-light text-[#C0A080]">${listing.price.toLocaleString()}</p>
               </div>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">No treasures found</h3>
-          <p className="text-gray-500 text-sm mb-4">Be the first to list something amazing!</p>
-          <Link href="/marketplace/sell" className="text-[#A855F7] font-medium">
-            Start Selling →
-          </Link>
+        <div className="text-center py-20">
+          <div className="text-5xl mb-4 opacity-20">□</div>
+          <h3 className="text-lg text-[#666] mb-2">No listings found</h3>
         </div>
       )}
 
       <Link
         href="/marketplace/sell"
-        className="fixed bottom-20 right-4 w-14 h-14 bg-[#A855F7] rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform z-30"
+        className="fixed bottom-20 right-4 w-14 h-14 bg-[#C0A080] rounded-full shadow-lg flex items-center justify-center text-black text-2xl hover:scale-110 transition-transform z-30"
       >
-        <FiPlus size={28} />
+        +
       </Link>
     </div>
   );
