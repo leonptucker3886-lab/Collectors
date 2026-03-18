@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { FiCheck, FiPackage, FiArrowRight } from 'react-icons/fi';
+import { FiCheck, FiPackage } from 'react-icons/fi';
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const listingId = searchParams.get('listing');
 
@@ -15,9 +16,9 @@ export default function SuccessPage() {
           <FiCheck size={40} className="text-[#C0A080]" />
         </div>
         
-        <h1 className="text-2xl font-semibold mb-2">Payment Successful!</h1>
+        <h1 className="text-2xl font-semibold mb-2">Listing Updated!</h1>
         <p className="text-[#666] mb-8">
-          Thank you for your purchase. The seller has been notified and will ship your item soon.
+          Your item has been listed on the marketplace.
         </p>
 
         <div className="bg-[#141414] rounded-xl p-4 border border-[#1F1F1F] mb-6">
@@ -26,8 +27,8 @@ export default function SuccessPage() {
               <FiPackage size={24} className="text-[#C0A080]" />
             </div>
             <div className="text-left">
-              <p className="text-sm text-[#666]">Order confirmed</p>
-              <p className="font-medium">Purchase complete</p>
+              <p className="text-sm text-[#666]">Listing created</p>
+              <p className="font-medium">Now visible to buyers</p>
             </div>
           </div>
         </div>
@@ -37,16 +38,28 @@ export default function SuccessPage() {
             href="/marketplace"
             className="block w-full py-3 bg-[#C0A080] text-black rounded-full font-medium"
           >
-            Continue Shopping
+            View Marketplace
           </Link>
           <Link
-            href="/profile"
+            href="/collections"
             className="block w-full py-3 bg-[#1F1F1F] text-white rounded-full font-medium"
           >
-            View My Orders
+            Back to Vault
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#C0A080] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }
