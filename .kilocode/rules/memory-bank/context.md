@@ -32,6 +32,10 @@ CollectVault is a mobile-first collector portfolio manager built with Next.js 16
 - [x] Login added to bottom navigation
 - [x] Help Center with FAQs and guides
 - [x] Help link in Profile page
+- [x] AuthGuard component for route protection
+- [x] Professional dark/gold theme (#0A0A0A, #C0A080)
+- [x] Dashboard with subscription prompt for 2+ collections
+- [x] Updated BottomNav with gold accents, removed wishlist/trading
 
 ## Current Structure
 

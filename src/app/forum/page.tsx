@@ -76,7 +76,6 @@ export default function ForumPage() {
         category: newPost.category,
         authorId: user.uid,
         authorName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        authorAvatar: profile?.avatar || '👤',
         likes: 0,
         createdAt: serverTimestamp(),
         commentCount: 0,

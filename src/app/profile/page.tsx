@@ -5,15 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { Button, Select } from '../../components/ui';
+import { Select } from '../../components/ui';
 import storage from '../../lib/storage';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { 
   FiDownload, FiUpload, FiFileText, FiTrash2, 
-  FiHelpCircle, FiLogOut, FiEdit2, FiMessageCircle, FiRefreshCw
+  FiHelpCircle, FiLogOut, FiEdit2, FiRefreshCw, FiUser
 } from 'react-icons/fi';
-import { AVATARS, AVATAR_COLORS, UserProfile } from '../../types';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,7 +21,6 @@ export default function ProfilePage() {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [importing, setImporting] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const stats = getDashboardStats();
 
   const [editForm, setEditForm] = useState({
@@ -41,15 +39,6 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     await updateProfile(editForm);
     setEditingProfile(false);
-  };
-
-  const handleAvatarChange = async (avatar: string) => {
-    await updateProfile({ avatar });
-    setShowAvatarPicker(false);
-  };
-
-  const handleColorChange = async (color: string) => {
-    await updateProfile({ avatarColor: color });
   };
 
   const handleExportPDF = async () => {
@@ -83,7 +72,7 @@ export default function ProfilePage() {
         head: [['Name', 'Condition', 'Value', 'Notes']],
         body: tableData,
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [168, 85, 247] },
+        headStyles: { fillColor: [192, 160, 128] },
       });
       
       yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
@@ -166,10 +155,10 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Sign in to view your profile</h2>
-          <Link href="/login" className="px-6 py-3 bg-[#A855F7] text-white rounded-full font-medium">
+          <h2 className="text-xl font-semibold text-white mb-4">Sign in to view your profile</h2>
+          <Link href="/login" className="px-6 py-3 bg-[#C0A080] text-black rounded-full font-medium">
             Sign In
           </Link>
         </div>
@@ -178,51 +167,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 pb-24">
-      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 z-30">
-        <h1 className="text-xl font-bold">My Profile</h1>
+    <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
+      <div className="sticky top-0 bg-[#0A0A0A] border-b border-[#1F1F1F] px-4 py-3 z-30">
+        <h1 className="text-xl font-semibold">Profile</h1>
       </div>
 
       <div className="p-4">
         {profile && (
-          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-4">
+          <div className="bg-[#141414] rounded-2xl p-6 border border-[#1F1F1F] mb-4">
             <div className="flex items-start gap-4">
-              <div className="relative">
-                <button
-                  onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br flex items-center justify-center text-4xl transition-transform hover:scale-105"
-                  style={{ background: `linear-gradient(135deg, ${profile.avatarColor}, ${profile.avatarColor}99)` }}
-                >
-                  {profile.avatar}
-                </button>
-                
-                {showAvatarPicker && (
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl p-4 z-50 shadow-xl border border-gray-200">
-                    <p className="text-sm text-gray-500 mb-2">Choose Avatar</p>
-                    <div className="grid grid-cols-5 gap-2 max-h-32 overflow-y-auto mb-3">
-                      {AVATARS.map((avatar: string) => (
-                        <button
-                          key={avatar}
-                          onClick={() => handleAvatarChange(avatar)}
-                          className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xl"
-                        >
-                          {avatar}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-sm text-gray-500 mb-2">Choose Color</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {AVATAR_COLORS.map((color: string) => (
-                        <button
-                          key={color}
-                          onClick={() => handleColorChange(color)}
-                          className={`w-8 h-8 rounded-full ${profile.avatarColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="w-20 h-20 rounded-full bg-[#1F1F1F] flex items-center justify-center">
+                <FiUser size={36} className="text-[#666]" />
               </div>
               
               <div className="flex-1">
@@ -233,25 +188,25 @@ export default function ProfilePage() {
                       value={editForm.displayName}
                       onChange={(e) => setEditForm({ ...editForm, displayName: e.target.value })}
                       placeholder="Display Name"
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 font-semibold"
+                      className="w-full px-3 py-2 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-white"
                     />
                     <input
                       type="text"
                       value={editForm.tagline}
                       onChange={(e) => setEditForm({ ...editForm, tagline: e.target.value })}
                       placeholder="Your tagline..."
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 text-sm"
+                      className="w-full px-3 py-2 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-[#888] text-sm"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveProfile}
-                        className="flex-1 py-2 bg-[#A855F7] text-white rounded-lg text-sm font-medium"
+                        className="flex-1 py-2 bg-[#C0A080] text-black rounded-lg text-sm font-medium"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => setEditingProfile(false)}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
+                        className="px-4 py-2 bg-[#1F1F1F] text-[#888] rounded-lg text-sm"
                       >
                         Cancel
                       </button>
@@ -260,7 +215,7 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-gray-900">{profile.displayName}</h2>
+                      <h2 className="text-xl font-semibold text-white">{profile.displayName}</h2>
                       <button
                         onClick={() => {
                           setEditForm({
@@ -272,13 +227,13 @@ export default function ProfilePage() {
                           });
                           setEditingProfile(true);
                         }}
-                        className="p-1 text-gray-400 hover:text-gray-600"
+                        className="p-1 text-[#666] hover:text-white"
                       >
                         <FiEdit2 size={16} />
                       </button>
                     </div>
                     {profile.tagline && (
-                      <p className="text-gray-500 text-sm mt-1">{profile.tagline}</p>
+                      <p className="text-[#666] text-sm mt-1">{profile.tagline}</p>
                     )}
                   </>
                 )}
@@ -288,90 +243,85 @@ export default function ProfilePage() {
         )}
 
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="p-4 bg-gray-50 rounded-xl text-center">
-            <FiMessageCircle className="w-6 h-6 mx-auto text-[#A855F7] mb-1" />
-            <p className="text-xl font-bold text-gray-900">{profile?.postCount || 0}</p>
-            <p className="text-xs text-gray-500">Posts</p>
+          <div className="p-4 bg-[#141414] rounded-xl text-center border border-[#1F1F1F]">
+            <FiRefreshCw className="w-6 h-6 mx-auto text-[#C0A080] mb-1" />
+            <p className="text-xl font-semibold text-white">{profile?.tradeCount || 0}</p>
+            <p className="text-xs text-[#666]">Trades</p>
           </div>
-          <div className="p-4 bg-gray-50 rounded-xl text-center">
-            <FiRefreshCw className="w-6 h-6 mx-auto text-[#A855F7] mb-1" />
-            <p className="text-xl font-bold text-gray-900">{profile?.tradeCount || 0}</p>
-            <p className="text-xs text-gray-500">Trades</p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-xl text-center">
-            <p className="text-xl font-bold text-gray-900">{stats.totalItems}</p>
-            <p className="text-xs text-gray-500">Items</p>
+          <div className="p-4 bg-[#141414] rounded-xl text-center border border-[#1F1F1F] col-span-2">
+            <p className="text-2xl font-semibold text-[#C0A080]">${stats.totalValue.toLocaleString()}</p>
+            <p className="text-xs text-[#666]">Total Value</p>
           </div>
         </div>
 
         <div className="space-y-3 mb-4">
-          <h2 className="text-lg font-semibold">My Collection</h2>
+          <h2 className="text-lg font-light">My Collection</h2>
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-4 bg-gray-50 rounded-xl">
-              <p className="text-2xl font-bold text-gray-900">{stats.totalCollections}</p>
-              <p className="text-sm text-gray-500">Collections</p>
+            <div className="p-4 bg-[#141414] rounded-xl border border-[#1F1F1F]">
+              <p className="text-2xl font-semibold text-white">{stats.totalCollections}</p>
+              <p className="text-sm text-[#666]">Collections</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl">
-              <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString()}</p>
-              <p className="text-sm text-gray-500">Total Value</p>
+            <div className="p-4 bg-[#141414] rounded-xl border border-[#1F1F1F]">
+              <p className="text-2xl font-semibold text-white">{stats.totalItems}</p>
+              <p className="text-sm text-[#666]">Items</p>
             </div>
           </div>
         </div>
 
         <div className="space-y-3 mb-4">
-          <h2 className="text-lg font-semibold">Data</h2>
+          <h2 className="text-lg font-light">Data</h2>
           
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="w-full p-4 bg-gray-50 rounded-xl flex items-center justify-between"
+              className="w-full p-4 bg-[#141414] rounded-xl flex items-center justify-between border border-[#1F1F1F]"
             >
               <div className="flex items-center gap-3">
-                <FiDownload size={20} className="text-[#A855F7]" />
-                <span className="text-gray-700">Export Data</span>
+                <FiDownload size={20} className="text-[#C0A080]" />
+                <span className="text-white">Export Data</span>
               </div>
-              <span className="text-gray-400">→</span>
+              <span className="text-[#666]">→</span>
             </button>
             
             {showExportMenu && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl overflow-hidden z-10 shadow-xl border border-gray-200">
-                <button onClick={handleExportPDF} className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-2">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-[#141414] rounded-xl overflow-hidden z-10 shadow-xl border border-[#1F1F1F]">
+                <button onClick={handleExportPDF} className="w-full p-3 text-left hover:bg-[#1F1F1F] flex items-center gap-2 text-white">
                   <FiFileText size={16} /> Export as PDF Report
                 </button>
-                <button onClick={handleExportCSV} className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-2">
+                <button onClick={handleExportCSV} className="w-full p-3 text-left hover:bg-[#1F1F1F] flex items-center gap-2 text-white">
                   <FiFileText size={16} /> Export as CSV
                 </button>
-                <button onClick={handleExportJSON} className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-2">
+                <button onClick={handleExportJSON} className="w-full p-3 text-left hover:bg-[#1F1F1F] flex items-center gap-2 text-white">
                   <FiDownload size={16} /> Export Full Backup (JSON)
                 </button>
               </div>
             )}
           </div>
 
-          <label className="block w-full p-4 bg-gray-50 rounded-xl flex items-center justify-between cursor-pointer hover:bg-gray-100">
+          <label className="block w-full p-4 bg-[#141414] rounded-xl flex items-center justify-between cursor-pointer border border-[#1F1F1F] hover:border-[#2A2A2A">
             <div className="flex items-center gap-3">
-              <FiUpload size={20} className="text-[#A855F7]" />
-              <span className="text-gray-700">Import Data</span>
+              <FiUpload size={20} className="text-[#C0A080]" />
+              <span className="text-white">Import Data</span>
             </div>
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-            {importing && <span className="text-sm text-gray-400">Importing...</span>}
+            {importing && <span className="text-sm text-[#666]">Importing...</span>}
           </label>
 
           <button
             onClick={handleClearData}
-            className="w-full p-4 bg-gray-50 rounded-xl flex items-center justify-between hover:bg-red-50"
+            className="w-full p-4 bg-[#141414] rounded-xl flex items-center justify-between border border-[#1F1F1F] hover:border-red-900"
           >
             <div className="flex items-center gap-3">
               <FiTrash2 size={20} className="text-red-500" />
-              <span className="text-red-600">Clear All Data</span>
+              <span className="text-red-500">Clear All Data</span>
             </div>
           </button>
         </div>
 
         <div className="space-y-3 mb-4">
-          <h2 className="text-lg font-semibold">Settings</h2>
+          <h2 className="text-lg font-light">Settings</h2>
           
-          <div className="p-4 bg-gray-50 rounded-xl space-y-4">
+          <div className="p-4 bg-[#141414] rounded-xl border border-[#1F1F1F] space-y-4">
             <Select
               label="Currency"
               value={state.settings.currency}
@@ -389,27 +339,27 @@ export default function ProfilePage() {
 
           <Link
             href="/help"
-            className="w-full p-4 bg-gray-50 rounded-xl flex items-center justify-between hover:bg-gray-100"
+            className="w-full p-4 bg-[#141414] rounded-xl flex items-center justify-between border border-[#1F1F1F] hover:border-[#2A2A2A]"
           >
             <div className="flex items-center gap-3">
-              <FiHelpCircle size={20} className="text-[#A855F7]" />
-              <span className="text-gray-700">Help Center</span>
+              <FiHelpCircle size={20} className="text-[#C0A080]" />
+              <span className="text-white">Help Center</span>
             </div>
-            <span className="text-gray-400">→</span>
+            <span className="text-[#666]">→</span>
           </Link>
 
           <button
             onClick={handleLogout}
-            className="w-full p-4 bg-gray-50 rounded-xl flex items-center justify-between hover:bg-red-50"
+            className="w-full p-4 bg-[#141414] rounded-xl flex items-center justify-between border border-[#1F1F1F] hover:border-red-900"
           >
             <div className="flex items-center gap-3">
               <FiLogOut size={20} className="text-red-500" />
-              <span className="text-red-600">Sign Out</span>
+              <span className="text-red-500">Sign Out</span>
             </div>
           </button>
         </div>
 
-        <div className="text-center text-xs text-gray-400 py-4">
+        <div className="text-center text-xs text-[#444] py-4">
           CollectVault v1.0.0
         </div>
       </div>

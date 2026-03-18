@@ -72,7 +72,6 @@ export default function SellPage() {
         images: images,
         sellerId: user.uid,
         sellerName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
-        sellerAvatar: profile?.avatar || '⚔️',
         createdAt: serverTimestamp(),
         status: 'active',
         commission: commission,
@@ -102,50 +101,50 @@ export default function SellPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 pb-24">
-      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 z-30">
+    <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
+      <div className="sticky top-0 bg-[#0A0A0A] border-b border-[#1F1F1F] px-4 py-3 z-30">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="p-2 -ml-2 text-gray-600">
+          <button onClick={() => router.back()} className="p-2 -ml-2 text-[#666]">
             <FiArrowLeft size={24} />
           </button>
-          <h1 className="text-xl font-bold">List Your Item</h1>
+          <h1 className="text-xl font-semibold">List Your Item</h1>
         </div>
       </div>
 
       <div className="p-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+        <div className="bg-[#C0A080]/10 border border-[#C0A080]/30 rounded-xl p-4 mb-4">
           <div className="flex items-start gap-3">
-            <FiAlertTriangle className="text-amber-600 mt-0.5" />
+            <FiAlertTriangle className="text-[#C0A080] mt-0.5" />
             <div>
-              <h3 className="font-semibold text-amber-800">Authentication Reminder</h3>
-              <p className="text-sm text-amber-700 mt-1">
-                Buyers are responsible for verifying authenticity. We recommend using authentication services for valuable items.
+              <h3 className="font-medium text-[#C0A080]">Authentication Reminder</h3>
+              <p className="text-sm text-[#888] mt-1">
+                Buyers are responsible for verifying authenticity.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <div className="bg-[#1F1F1F] rounded-xl p-4 mb-4">
           <div className="flex items-start gap-3">
-            <FiShield className="text-blue-600 mt-0.5" />
+            <FiShield className="text-[#C0A080] mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-800">Escrow Protection</h3>
-              <p className="text-sm text-blue-700 mt-1">
-                All payments are held in escrow until the buyer receives and approves the item. This protects both buyers and sellers.
+              <h3 className="font-medium text-white">Escrow Protection</h3>
+              <p className="text-sm text-[#666] mt-1">
+                Payments held in escrow until buyer receives item.
               </p>
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+          <div className="bg-red-900/20 border border-red-900 text-red-400 px-4 py-3 rounded-lg text-sm mb-4">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Photos (up to 5)</label>
+            <label className="block text-sm font-medium text-white mb-2">Photos (up to 5)</label>
             <ImageUpload
               images={images}
               onChange={setImages}
@@ -203,31 +202,31 @@ export default function SellPage() {
           />
 
           {formData.price && parseFloat(formData.price) > 0 && (
-            <div className="p-4 bg-gray-50 rounded-xl space-y-2 text-sm">
+            <div className="p-4 bg-[#141414] rounded-xl space-y-2 text-sm border border-[#1F1F1F]">
               <div className="flex justify-between">
-                <span className="text-gray-600">Sale Price</span>
-                <span className="text-gray-900 font-medium">${parseFloat(formData.price).toFixed(2)}</span>
+                <span className="text-[#666]">Sale Price</span>
+                <span className="text-white font-medium">${parseFloat(formData.price).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Commission (5%)</span>
-                <span className="text-red-600">-${(parseFloat(formData.price) * 0.05).toFixed(2)}</span>
+                <span className="text-[#666]">Commission (5%)</span>
+                <span className="text-red-400">-${(parseFloat(formData.price) * 0.05).toFixed(2)}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-200">
-                <span className="text-gray-600">You Receive</span>
-                <span className="text-green-600 font-bold">${(parseFloat(formData.price) * 0.95).toFixed(2)}</span>
+              <div className="flex justify-between pt-2 border-t border-[#1F1F1F]">
+                <span className="text-[#666]">You Receive</span>
+                <span className="text-[#C0A080] font-bold">${(parseFloat(formData.price) * 0.95).toFixed(2)}</span>
               </div>
             </div>
           )}
 
-          <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer">
+          <label className="flex items-start gap-3 p-4 bg-[#141414] rounded-xl cursor-pointer border border-[#1F1F1F]">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-1 w-5 h-5 rounded text-[#A855F7]"
+              className="mt-1 w-5 h-5 rounded text-[#C0A080]"
             />
-            <span className="text-sm text-gray-600">
-              I confirm this is my item and I have read the <Link href="/help" className="text-[#A855F7] underline">terms of service</Link>.
+            <span className="text-sm text-[#666]">
+              I confirm this is my item and I have read the <Link href="/help" className="text-[#C0A080] underline">terms of service</Link>.
             </span>
           </label>
 

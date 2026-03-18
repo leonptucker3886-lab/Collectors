@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiFolder, FiUser, FiPlus, FiMessageSquare, FiTag, FiFileText, FiDollarSign } from 'react-icons/fi';
+import { FiHome, FiFolder, FiUser, FiPlus, FiSearch, FiBell } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 
 export default function BottomNav() {
@@ -17,19 +17,38 @@ export default function BottomNav() {
           href="/"
           className={`flex flex-col items-center justify-center flex-1 py-1 ${
             pathname === '/'
-              ? 'text-[#C0A080]'
+              ? 'text-white'
               : 'text-[#666]'
           }`}
         >
           <FiHome size={20} />
-          <span className="text-[9px] mt-0.5">Dashboard</span>
+          <span className="text-[9px] mt-0.5">Home</span>
+        </Link>
+
+        <Link
+          href="/marketplace"
+          className={`flex flex-col items-center justify-center flex-1 py-1 ${
+            pathname.startsWith('/marketplace')
+              ? 'text-white'
+              : 'text-[#666]'
+          }`}
+        >
+          <FiSearch size={20} />
+          <span className="text-[9px] mt-0.5">Search</span>
+        </Link>
+
+        <Link
+          href="/marketplace/sell"
+          className="flex flex-col items-center justify-center w-12 h-12 -mt-4 bg-[#C0A080] rounded-full shadow-lg"
+        >
+          <FiPlus size={24} className="text-black" />
         </Link>
 
         <Link
           href="/collections"
           className={`flex flex-col items-center justify-center flex-1 py-1 ${
             pathname.startsWith('/collections')
-              ? 'text-[#C0A080]'
+              ? 'text-white'
               : 'text-[#666]'
           }`}
         >
@@ -38,29 +57,10 @@ export default function BottomNav() {
         </Link>
 
         <Link
-          href="/marketplace/sell"
-          className="flex flex-col items-center justify-center w-10 h-10 -mt-3 bg-[#C0A080] rounded-full"
-        >
-          <FiPlus size={20} className="text-black" />
-        </Link>
-
-        <Link
-          href="/forum"
-          className={`flex flex-col items-center justify-center flex-1 py-1 ${
-            pathname.startsWith('/forum')
-              ? 'text-[#C0A080]'
-              : 'text-[#666]'
-          }`}
-        >
-          <FiMessageSquare size={20} />
-          <span className="text-[9px] mt-0.5">Forum</span>
-        </Link>
-
-        <Link
           href="/profile"
           className={`flex flex-col items-center justify-center flex-1 py-1 ${
             pathname.startsWith('/profile')
-              ? 'text-[#C0A080]'
+              ? 'text-white'
               : 'text-[#666]'
           }`}
         >

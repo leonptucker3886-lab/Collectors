@@ -5,7 +5,7 @@ import { auth } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { UserProfile, AVATARS, AVATAR_COLORS } from '../types';
+import { UserProfile } from '../types';
 
 interface AuthUser {
   uid: string;
@@ -30,15 +30,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const createDefaultProfile = (uid: string, email: string | null, displayName: string | null): UserProfile => {
-  const randomAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-  const randomColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
-  
   return {
     uid,
     displayName: displayName || email?.split('@')[0] || 'Collector',
     email: email || '',
-    avatar: randomAvatar,
-    avatarColor: randomColor,
     bio: '',
     tagline: '',
     location: '',

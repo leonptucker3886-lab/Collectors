@@ -4,8 +4,6 @@ export interface UserProfile {
   uid: string;
   displayName: string;
   email: string;
-  avatar: string;
-  avatarColor: string;
   bio: string;
   tagline: string;
   location: string;
@@ -15,18 +13,6 @@ export interface UserProfile {
   tradeCount: number;
   lastActive: string;
 }
-
-export const AVATARS = [
-  '👤', '👁️', '🔮', '💎', '⚜️', '🏛️', '⚔️', '🛡️', '👑', '📜',
-  '🎖️', '🏆', '💰', '🪙', '💵', '🔑', '⚓', '🧭', '🌟', '✨',
-  '📿', '🪷', '⚜️', '🏺', '🎭', '🎪', '🎯', '🎲', '♟️', '♠️',
-  '♥️', '♦️', '♣️', '🎰', '🃏', '🎴', '📯', '🔔', '🏅', '🎗️',
-];
-
-export const AVATAR_COLORS = [
-  '#1C1C1E', '#2C2C2E', '#3A3A3C', '#48484A', '#636366',
-  '#8E8E93', '#AEAEB2', '#C7C7CC', '#D1D1D6', '#E5E5EA',
-];
 
 export interface CustomField {
   id: string;
