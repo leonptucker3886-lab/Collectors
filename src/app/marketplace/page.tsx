@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import { FiSearch, FiHeart, FiClock, FiChevronRight, FiLoader } from 'react-icons/fi';
+import { FiSearch, FiHeart, FiClock, FiChevronRight, FiLoader, FiMapPin, FiUser, FiGrid } from 'react-icons/fi';
 import { collection, query, getDocs, orderBy, limit, where, startAfter, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
@@ -155,14 +155,27 @@ export default function MarketplacePage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <header className="sticky top-0 bg-[#0A0A0A] border-b border-[#1F1F1F] z-40">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-[#1F1F1F]">
+          <Link href="/landmark" className="flex items-center gap-1.5 text-[#666] hover:text-white">
+            <FiMapPin size={16} />
+            <span className="text-xs">Explore</span>
+          </Link>
+          <h1 className="text-lg font-semibold tracking-tight">Market</h1>
+          <Link href="/profile" className="flex items-center gap-1.5 text-[#666] hover:text-white">
+            <FiUser size={16} />
+            <span className="text-xs">Profile</span>
+          </Link>
+        </div>
         <div className="flex items-center justify-between px-4 py-3">
-          <Link href="/profile" className="flex items-center gap-2">
+          <Link href="/collections" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-[#1F1F1F] flex items-center justify-center">
-              <span className="text-sm text-[#888]">👤</span>
+              <FiGrid size={16} className="text-[#888]" />
             </div>
           </Link>
           <h1 className="text-lg font-semibold tracking-tight">CollectVault</h1>
-          <div className="w-8" />
+          <Link href="/marketplace/sell" className="px-3 py-1.5 bg-[#C0A080] text-black rounded-full text-xs font-medium">
+            Sell
+          </Link>
         </div>
 
         <div className="px-4 pb-3">
