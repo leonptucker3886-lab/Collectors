@@ -8,9 +8,9 @@ import { FiLock, FiMail, FiArrowRight, FiShield, FiStar, FiUsers, FiPackage } fr
 import Logo from '../../components/ui/Logo';
 
 const FEATURES = [
-  { icon: '💎', title: 'Premium Collectibles', desc: 'Buy and sell rare items' },
-  { icon: '🛡️', title: 'Secure Payments', desc: 'Protected transactions' },
-  { icon: '👥', title: 'Active Community', desc: 'Connect with collectors' },
+  { icon: '📦', title: 'Track Items', desc: 'Organize your collection' },
+  { icon: '💰', title: 'Track Value', desc: 'Monitor worth over time' },
+  { icon: '📸', title: 'Photo Gallery', desc: 'Showcase your items' },
 ];
 
 const TESTIMONIALS = [
@@ -72,8 +72,21 @@ export default function LoginPage() {
               <Logo size="md" />
               <div>
                 <h1 className="text-2xl font-light tracking-wide text-white">CollectVault</h1>
-                <p className="text-xs text-[#666]">The Premier Marketplace</p>
+                <p className="text-xs text-[#666]">Collection Inventory App</p>
               </div>
+            </div>
+
+            <div className="bg-[#C0A080]/10 border border-[#C0A080]/30 rounded-xl p-4 mb-6">
+              <p className="text-sm text-[#C0A080] font-medium mb-1">⚠️ Database Being Built</p>
+              <p className="text-xs text-[#666]">
+                Login system is currently under construction. Please login as guest to continue.
+              </p>
+              <button
+                onClick={() => router.push('/collections')}
+                className="mt-3 px-4 py-2 bg-[#C0A080] text-black rounded-lg text-sm font-medium w-full"
+              >
+                Continue as Guest
+              </button>
             </div>
 
             <h2 className="text-3xl lg:text-4xl font-light text-white mb-4">
@@ -81,8 +94,8 @@ export default function LoginPage() {
             </h2>
             <p className="text-[#888] mb-8">
               {isSignUp 
-                ? 'Start buying, selling, and trading with thousands of collectors worldwide.'
-                : 'Continue your journey as a collector.'
+                ? 'Start tracking your collections today.'
+                : 'Continue managing your collection.'
               }
             </p>
 
